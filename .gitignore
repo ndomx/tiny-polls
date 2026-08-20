@@ -40,3 +40,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# pocketbase
+/pocketbase/CHANGELOG.md
+/pocketbase/LICENSE.md
+/pocketbase/pocketbase
+/pocketbase/pb_data/
+/pocketbase/pb_logs/
+/pocketbase/pocketbase_*.zip
