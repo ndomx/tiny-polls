@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tiny Polls
 
-## Getting Started
+A tiny local-first poll app backed by PocketBase.
 
-First, run the development server:
+## Guardrails
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- The app is local-first.
+- The implementation must not assume, mention, or encode any production target.
+- PocketBase is the only app data source for polls and submissions.
+- Polls live in PocketBase, not in application code.
+- Voters stay accountless and are identified by the `tiny_polls_voter_id` browser cookie.
+- Public results are anonymous.
+- Owner-only views may show voter details after local owner-key validation.
+- Production runtime choices are intentionally outside this repository.
+
+## Local Pieces
+
+- Next.js app for poll pages, voting, and results.
+- Local PocketBase service for data and admin UI.
+- PocketBase schema migrations in `pocketbase/pb_migrations`.
+- PocketBase local data in `pocketbase/pb_data`.
+
+## Local Config
+
+Create `.env.local` from `.env.example`:
+
+```text
+POCKETBASE_URL=http://127.0.0.1:8090
+POCKETBASE_SUPERUSER_EMAIL=you@example.com
+POCKETBASE_SUPERUSER_PASSWORD=change-this-pocketbase-password
+OWNER_KEY=dev-owner-key
+PORT=3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Reference Routes
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```text
+/polls/<codename>
+/polls/<codename>/results
+/owner/<codename>?key=<owner-key>
+```
