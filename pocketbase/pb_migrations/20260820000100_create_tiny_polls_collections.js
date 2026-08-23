@@ -76,7 +76,7 @@ migrate((app) => {
       {
         name: "correctAnswerIds",
         type: "json",
-        required: true,
+        required: false,
       },
     ],
     indexes: [

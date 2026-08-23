@@ -43,7 +43,16 @@ export default async function PollPage({
     ? await getSubmissionForVoter(poll, voterId || "")
     : null;
   const previousOptions = new Set(previousSubmission?.selectedOptions || []);
-  const closed = isExpired(poll);
+  const now = new Date();
+  const closed = isExpired(poll, now);
+  const ended =
+    poll.status === "closed" ||
+    (poll.status === "open" &&
+      now.getTime() > new Date(poll.expiresAt).getTime());
+  const correctAnswerIds = new Set(poll.correctAnswerIds);
+  const correctAnswers = poll.options.filter((option) =>
+    correctAnswerIds.has(option.id),
+  );
   const source =
     getParam(query, "source") || getParam(query, "utm_source") || "direct";
   const utmSource = getParam(query, "utm_source");
@@ -102,7 +111,14 @@ export default async function PollPage({
           </legend>
           <div className="optionsGrid">
             {poll.options.map((option) => (
-              <label className="optionTile" key={option.id}>
+              <label
+                className={`optionTile ${
+                  ended && correctAnswerIds.has(option.id)
+                    ? "correctAnswerTile"
+                    : ""
+                }`}
+                key={option.id}
+              >
                 <input
                   defaultChecked={previousOptions.has(option.id)}
                   name="options"
@@ -111,13 +127,30 @@ export default async function PollPage({
                   value={option.id}
                 />
                 <span>{option.label}</span>
+                {ended && correctAnswerIds.has(option.id) ? (
+                  <strong>Correct</strong>
+                ) : null}
               </label>
             ))}
           </div>
         </fieldset>
 
         {closed ? (
-          <p className="closedNotice">This poll is closed.</p>
+          <div className="closedAnswerPanel">
+            <p className="closedNotice">This poll is closed.</p>
+            {ended && correctAnswers.length > 0 ? (
+              <div>
+                <span>The correct answer is</span>
+                <strong>
+                  {correctAnswers.map((answer) => answer.label).join(", ")}
+                </strong>
+              </div>
+            ) : ended ? (
+              <div>
+                <span>The correct answer has not been set yet.</span>
+              </div>
+            ) : null}
+          </div>
         ) : (
           <button className="primaryButton" type="submit">
             {previousSubmission ? "Update Vote" : "Submit Vote"}

@@ -8,13 +8,14 @@ A tiny local-first poll app backed by PocketBase.
 | --- | --- |
 | Anonymous users can open a previously created poll and vote if the poll is still open. | Implemented. Public poll links at `/polls/<codename>` load polls from PocketBase, and the vote API rejects closed, draft, expired, or missing polls. |
 | The app is shared only with close contacts and does not need heavy security focus. | Reflected in the current design. Polls are private by unlisted link, voters do not need accounts, and admin data access currently uses local server-side PocketBase credentials. |
-| Admin can access all polls and see voter info. | Partially implemented. PocketBase Admin UI can access all `polls` and `submissions`. The Tiny Polls app has a per-poll owner dashboard at `/owner/<codename>` that shows voter names, short voter IDs, answers, correctness, submission time, and source data after admin login. It does not yet have an in-app admin page that lists all polls. |
+| Admin can access all polls and see voter info. | Implemented. Admins can sign in at `/admin/login`, view all polls at `/admin`, and open each poll's owner dashboard at `/owner/<codename>` to see voter names, short voter IDs, answers, correctness, submission time, and source data. PocketBase Admin UI can also access all `polls` and `submissions`. |
 | Admin-exclusive pages must be protected behind PocketBase auth. | Implemented for the existing owner dashboard and owner API. Admins sign in at `/admin/login` using PocketBase superuser credentials, and the app stores the PocketBase token in an `httpOnly` cookie. |
-| Admin needs a way to submit new polls. For now, polls are multiple-selection questions with a single correct answer. | Partially implemented. The PocketBase schema supports poll records with JSON options, `minSelections`, `maxSelections`, and `correctAnswerIds`; the seeded poll is a single-answer multiple-choice poll. There is not yet an in-app admin form/API for creating polls. |
+| Admin needs a way to submit new polls. For now, polls are multiple-selection questions with a single correct answer. | Implemented. Admins can create polls at `/admin/polls/new`; the app stores JSON options, forces one selection, and allows zero or one correct answer so the answer can be set later. |
 
 ## Implemented Features
 
 - Public poll pages are available at `/polls/<codename>`.
+- Closed or expired poll pages show the correct answer.
 - Anonymous voters are identified by the `tiny_polls_voter_id` browser cookie.
 - Voters provide a display name before submitting.
 - Votes can be updated from the same browser as long as the poll remains open.
@@ -25,18 +26,23 @@ A tiny local-first poll app backed by PocketBase.
 - Results include current counts, percentages, and a simple history chart.
 - Owner results include private submission details and source breakdowns.
 - Admin login and logout are available at `/admin/login`.
+- Admin poll listing is available at `/admin`, with links to owner results and public voting plus close/remove poll actions.
+- Admin poll creation is available at `/admin/polls/new`.
+- Admin poll editing is available at `/admin/polls/<codename>/edit` for content, status, close time, answer options, and the correct answer.
+- Poll creation and editing validate unique codenames, required text, status, close time, at least two options, and at most one correct answer.
+- Poll creation and editing support deferring the correct-answer selection.
 - Existing owner pages and owner APIs are protected by a PocketBase-authenticated admin session.
 - Owner pages include generated share links for `family`, `friends`, and `group` source tracking.
 - PocketBase migrations create the required `polls` and `submissions` collections and seed one local demo poll.
 
 ## Missing Work
 
-- Add an in-app admin poll list so an admin can access all polls without knowing each codename.
-- Add an in-app poll creation form/API for single-correct-answer multiple-choice polls.
-- Add validation for new poll creation, including unique codenames, at least two options, exactly one correct answer, and `minSelections`/`maxSelections` rules.
-- Decide whether the in-app admin should manage poll status changes, close times, and edits after creation.
 - Consider replacing superuser-backed app login with a dedicated PocketBase `admins` auth collection before the admin surface grows.
-- Add tests around closed-poll rejection, duplicate-voter update behavior, public/private result payloads, and future admin auth/create flows.
+- Add tests around closed-poll rejection, duplicate-voter update behavior, public/private result payloads, admin auth, and poll create/edit/delete flows.
+
+## Future Features
+
+- Replace the timeline graph with a simple pie chart.
 
 ## Guardrails
 
@@ -93,7 +99,10 @@ http://127.0.0.1:3000/polls/baby-guess-stage-1
 ```text
 /polls/<codename>
 /polls/<codename>/results
+/admin
 /admin/login
+/admin/polls/new
+/admin/polls/<codename>/edit
 /owner/<codename>
 ```
 
