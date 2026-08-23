@@ -151,6 +151,7 @@ migrate((app) => {
       {
         name: "isCorrect",
         type: "bool",
+        required: false,
       },
       {
         name: "submittedAt",

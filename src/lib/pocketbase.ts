@@ -22,7 +22,6 @@ export function appConfig() {
     ).replace(/\/$/, ""),
     pocketbaseEmail: process.env.POCKETBASE_SUPERUSER_EMAIL || "",
     pocketbasePassword: process.env.POCKETBASE_SUPERUSER_PASSWORD || "",
-    ownerKey: process.env.OWNER_KEY || "dev-owner-key",
   };
 }
 

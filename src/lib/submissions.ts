@@ -70,6 +70,17 @@ type PocketBaseSubmissionRecord = {
   submittedAt: string;
 };
 
+type PocketBaseCollectionField = Record<string, unknown> & {
+  name?: string;
+  required?: boolean;
+};
+
+type PocketBaseCollectionSchema = {
+  fields?: PocketBaseCollectionField[];
+};
+
+let submissionSchemaChecked = false;
+
 function normalizeSubmission(record: PocketBaseSubmissionRecord): Submission {
   return {
     id: record.id,
@@ -84,6 +95,62 @@ function normalizeSubmission(record: PocketBaseSubmissionRecord): Submission {
     isCorrect: Boolean(record.isCorrect),
     createdAt: normalizePocketBaseDate(record.submittedAt),
   };
+}
+
+async function ensureSubmissionSchemaAllowsIncorrectAnswers() {
+  if (submissionSchemaChecked) {
+    return;
+  }
+
+  const collection = await pocketBaseRequest<PocketBaseCollectionSchema>(
+    "/api/collections/submissions",
+    { cache: "no-store" },
+  );
+  const fields = collection.fields || [];
+  const isCorrect = fields.find((field) => field.name === "isCorrect");
+
+  if (isCorrect?.required) {
+    await pocketBaseRequest("/api/collections/submissions", {
+      method: "PATCH",
+      cache: "no-store",
+      body: JSON.stringify({
+        fields: fields.map((field) =>
+          field.name === "isCorrect" ? { ...field, required: false } : field,
+        ),
+      }),
+    });
+  }
+
+  submissionSchemaChecked = true;
+}
+
+function isCorrectRequiredError(error: unknown) {
+  return (
+    error instanceof Error &&
+    error.message.includes('"isCorrect"') &&
+    error.message.includes("validation_required")
+  );
+}
+
+async function saveSubmissionRecord(
+  existing: Submission | null,
+  submission: Record<string, unknown>,
+) {
+  if (existing) {
+    await pocketBaseRequest(
+      `/api/collections/submissions/records/${existing.id}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(submission),
+      },
+    );
+    return;
+  }
+
+  await pocketBaseRequest("/api/collections/submissions/records", {
+    method: "POST",
+    body: JSON.stringify(submission),
+  });
 }
 
 export async function getSubmissionForVoter(poll: Poll, voterId: string) {
@@ -153,20 +220,18 @@ export async function saveSubmission(poll: Poll, input: SubmissionInput) {
   };
 
   const existing = await getSubmissionForVoter(poll, input.voterId);
+  await ensureSubmissionSchemaAllowsIncorrectAnswers();
 
-  if (existing) {
-    await pocketBaseRequest(
-      `/api/collections/submissions/records/${existing.id}`,
-      {
-        method: "PATCH",
-        body: JSON.stringify(submission),
-      },
-    );
-  } else {
-    await pocketBaseRequest("/api/collections/submissions/records", {
-      method: "POST",
-      body: JSON.stringify(submission),
-    });
+  try {
+    await saveSubmissionRecord(existing, submission);
+  } catch (error) {
+    if (!isCorrectRequiredError(error)) {
+      throw error;
+    }
+
+    submissionSchemaChecked = false;
+    await ensureSubmissionSchemaAllowsIncorrectAnswers();
+    await saveSubmissionRecord(existing, submission);
   }
 
   return { ok: true };

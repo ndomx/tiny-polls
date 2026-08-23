@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
-import { appConfig } from "@/lib/pocketbase";
+import { getAdminSession } from "@/lib/admin-auth";
 import { getResults } from "@/lib/submissions";
 
 type OwnerRouteContext = {
   params: Promise<{ codename: string }>;
 };
 
-export async function GET(request: Request, context: OwnerRouteContext) {
+export async function GET(_request: Request, context: OwnerRouteContext) {
   const { codename } = await context.params;
-  const url = new URL(request.url);
+  const session = await getAdminSession();
 
-  if (url.searchParams.get("key") !== appConfig().ownerKey) {
-    return NextResponse.json({ error: "Owner key required" }, { status: 401 });
+  if (!session) {
+    return NextResponse.json({ error: "Admin auth required" }, { status: 401 });
   }
 
   const results = await getResults(codename, true);

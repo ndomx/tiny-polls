@@ -164,6 +164,15 @@ input {
   padding: 0 14px;
 }
 
+.adminLoginPanel {
+  width: min(100%, 480px);
+}
+
+.adminLoginForm {
+  display: grid;
+  gap: 16px;
+}
+
 .optionsField {
   border: 0;
   margin: 0;
@@ -234,12 +243,19 @@ input {
   min-width: 190px;
 }
 
-.shareLinks a {
+.shareLinks a,
+.shareLinks button {
+  background: transparent;
   border: 1px solid var(--line);
   border-radius: 6px;
+  color: inherit;
+  cursor: pointer;
+  display: block;
   font-weight: 800;
   padding: 10px 12px;
+  text-align: left;
   text-decoration: none;
+  width: 100%;
 }
 
 .resultsShell {

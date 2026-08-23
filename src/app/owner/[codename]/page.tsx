@@ -1,39 +1,25 @@
+import { redirect } from "next/navigation";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { Notice } from "@/components/notice";
 import { ResultsShell } from "@/components/results-shell";
-import { appConfig } from "@/lib/pocketbase";
+import { getAdminSession } from "@/lib/admin-auth";
 import { getResults } from "@/lib/submissions";
 
 export const dynamic = "force-dynamic";
 
 type OwnerPageProps = {
   params: Promise<{ codename: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-function getParam(
-  searchParams: Awaited<OwnerPageProps["searchParams"]>,
-  key: string,
-) {
-  const value = searchParams[key];
-  return Array.isArray(value) ? value[0] || "" : value || "";
-}
-
-export default async function OwnerPage({
-  params,
-  searchParams,
-}: OwnerPageProps) {
+export default async function OwnerPage({ params }: OwnerPageProps) {
   const { codename } = await params;
-  const query = await searchParams;
-  const ownerKey = getParam(query, "key");
+  const session = await getAdminSession();
 
-  if (ownerKey !== appConfig().ownerKey) {
-    return (
-      <Notice
-        eyebrow="Owner Dashboard"
-        title="Owner key required"
-        message="Add your private key to view voter details."
-      />
+  if (!session) {
+    redirect(
+      `/admin/login?next=${encodeURIComponent(
+        `/owner/${encodeURIComponent(codename)}`,
+      )}`,
     );
   }
 
@@ -63,6 +49,9 @@ export default async function OwnerPage({
           <a href={`${shareBase}?source=family`}>Family Link</a>
           <a href={`${shareBase}?source=friends`}>Friends Link</a>
           <a href={`${shareBase}?source=group`}>Group Link</a>
+          <form action="/api/admin/logout" method="post">
+            <button type="submit">Sign Out</button>
+          </form>
         </div>
       </section>
       <ResultsShell owner results={results} />
