@@ -1,4 +1,4 @@
-import { formatClock, formatShortTime } from "@/lib/format";
+import { formatClock } from "@/lib/format";
 import type { ResultsPayload, Submission } from "@/lib/submissions";
 import { shortVoterId } from "@/lib/voter";
 
@@ -52,12 +52,12 @@ export function ResultsShell({ results, owner = false }: ResultsShellProps) {
       <div className="chartPanel">
         <div className="sectionHeader compact">
           <div>
-            <p className="eyebrow">History</p>
-            <h2>How Answers Changed</h2>
+            <p className="eyebrow">Share</p>
+            <h2>Vote Distribution</h2>
           </div>
           <p className="muted">{results.totalVotes} total submissions</p>
         </div>
-        <LineChart results={results} />
+        <PieChart results={results} />
       </div>
 
       {owner ? <OwnerDetails results={results} /> : null}
@@ -65,68 +65,92 @@ export function ResultsShell({ results, owner = false }: ResultsShellProps) {
   );
 }
 
-function LineChart({ results }: { results: ResultsPayload }) {
-  const width = 760;
-  const height = 260;
-  const padding = 32;
-  const history =
-    results.history.length > 0 ? results.history : [{ at: "", counts: {} }];
-  const maxCount = Math.max(
-    1,
-    ...results.options.map((option) => option.count),
+function pieSlicePath(
+  centerX: number,
+  centerY: number,
+  radius: number,
+  startRatio: number,
+  endRatio: number,
+) {
+  const startAngle = startRatio * Math.PI * 2 - Math.PI / 2;
+  const endAngle = endRatio * Math.PI * 2 - Math.PI / 2;
+  const startX = centerX + Math.cos(startAngle) * radius;
+  const startY = centerY + Math.sin(startAngle) * radius;
+  const endX = centerX + Math.cos(endAngle) * radius;
+  const endY = centerY + Math.sin(endAngle) * radius;
+  const largeArc = endRatio - startRatio > 0.5 ? 1 : 0;
+
+  return [
+    `M ${centerX} ${centerY}`,
+    `L ${startX} ${startY}`,
+    `A ${radius} ${radius} 0 ${largeArc} 1 ${endX} ${endY}`,
+    "Z",
+  ].join(" ");
+}
+
+function PieChart({ results }: { results: ResultsPayload }) {
+  const totalSelections = results.options.reduce(
+    (sum, option) => sum + option.count,
+    0,
   );
-  const xFor = (index: number) =>
-    history.length === 1
-      ? padding
-      : padding +
-        (index * (width - padding * 2)) / Math.max(1, history.length - 1);
-  const yFor = (count: number) =>
-    height - padding - (count * (height - padding * 2)) / maxCount;
+  let cumulative = 0;
 
   return (
-    <svg className="lineChart" viewBox={`0 0 ${width} ${height}`} role="img">
-      <title>Vote history over time</title>
-      <line
-        x1={padding}
-        y1={height - padding}
-        x2={width - padding}
-        y2={height - padding}
-      />
-      <line x1={padding} y1={padding} x2={padding} y2={height - padding} />
-      {results.options.map((option, optionIndex) => {
-        const path = history
-          .map((point, pointIndex) => {
-            const command = pointIndex === 0 ? "M" : "L";
-            return `${command} ${xFor(pointIndex)} ${yFor(
-              point.counts[option.id] || 0,
-            )}`;
-          })
-          .join(" ");
+    <div className="pieChartWrap">
+      <svg className="pieChart" viewBox="0 0 240 240" role="img">
+        <title>Vote distribution</title>
+        {totalSelections === 0 ? (
+          <circle cx="120" cy="120" fill="#ece3d7" r="96" />
+        ) : (
+          results.options.map((option, index) => {
+            const startRatio = cumulative / totalSelections;
+            cumulative += option.count;
+            const endRatio = cumulative / totalSelections;
 
-        return (
-          <path
-            d={path}
-            fill="none"
-            key={option.id}
-            stroke={colors[optionIndex % colors.length]}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="4"
-          />
-        );
-      })}
-      {history.map((point, pointIndex) =>
-        pointIndex === 0 || pointIndex === history.length - 1 ? (
-          <text
-            key={`${point.at}-${pointIndex}`}
-            x={xFor(pointIndex)}
-            y={height - 6}
-          >
-            {formatShortTime(point.at)}
-          </text>
-        ) : null,
-      )}
-    </svg>
+            if (option.count === 0) {
+              return null;
+            }
+
+            return (
+              <path
+                d={pieSlicePath(120, 120, 96, startRatio, endRatio)}
+                fill={colors[index % colors.length]}
+                key={option.id}
+              />
+            );
+          })
+        )}
+        <circle className="pieHole" cx="120" cy="120" r="48" />
+        <text className="pieTotal" x="120" y="116">
+          {totalSelections}
+        </text>
+        <text className="pieTotalLabel" x="120" y="138">
+          votes
+        </text>
+      </svg>
+
+      <div className="pieLegend">
+        {results.options.map((option, index) => {
+          const percentage =
+            totalSelections === 0
+              ? 0
+              : Math.round((option.count / totalSelections) * 100);
+
+          return (
+            <div className="pieLegendRow" key={option.id}>
+              <span
+                className="swatch"
+                style={{ background: colors[index % colors.length] }}
+              />
+              <strong>{option.label}</strong>
+              <span>
+                {option.count} votes · {percentage}%
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 

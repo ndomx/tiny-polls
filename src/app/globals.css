@@ -561,22 +561,63 @@ textarea {
   padding: 20px;
 }
 
-.lineChart {
+.pieChartWrap {
+  align-items: center;
+  display: grid;
+  gap: 22px;
+  grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
+  margin-top: 16px;
+}
+
+.pieChart {
   display: block;
   height: auto;
-  margin-top: 12px;
+  max-width: 240px;
   width: 100%;
 }
 
-.lineChart line {
-  stroke: var(--line);
-  stroke-width: 2;
+.pieHole {
+  fill: var(--panel);
 }
 
-.lineChart text {
-  fill: var(--muted);
-  font-size: 12px;
+.pieTotal,
+.pieTotalLabel {
+  fill: var(--foreground);
+  font-weight: 900;
   text-anchor: middle;
+}
+
+.pieTotal {
+  font-size: 2rem;
+}
+
+.pieTotalLabel {
+  fill: var(--muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.pieLegend {
+  display: grid;
+  gap: 10px;
+}
+
+.pieLegendRow {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.pieLegendRow strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pieLegendRow span:last-child {
+  color: var(--muted);
+  font-weight: 800;
 }
 
 .ownerGrid {
@@ -756,7 +797,9 @@ textarea {
   .pollListItem,
   .pollListMain dl,
   .formGrid,
-  .adminOptionRow {
+  .adminOptionRow,
+  .pieChartWrap,
+  .pieLegendRow {
     grid-template-columns: 1fr;
   }
 

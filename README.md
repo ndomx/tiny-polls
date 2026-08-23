@@ -23,7 +23,7 @@ A tiny local-first poll app backed by PocketBase.
 - The current UI supports single-answer polls with radio buttons and multi-answer polls with checkboxes.
 - Vote submissions store selected option IDs, voter name, voter ID, source, UTM fields, user agent, correctness, and submission time.
 - Public results at `/polls/<codename>/results` are anonymous and auto-refresh.
-- Results include current counts, percentages, and a simple history chart.
+- Results include current counts, percentages, and a simple pie chart.
 - Owner results include private submission details and source breakdowns.
 - Admin login and logout are available at `/admin/login`.
 - Admin poll listing is available at `/admin`, with links to owner results and public voting plus close/remove poll actions.
@@ -39,10 +39,6 @@ A tiny local-first poll app backed by PocketBase.
 
 - Consider replacing superuser-backed app login with a dedicated PocketBase `admins` auth collection before the admin surface grows.
 - Add tests around closed-poll rejection, duplicate-voter update behavior, public/private result payloads, admin auth, and poll create/edit/delete flows.
-
-## Future Features
-
-- Replace the timeline graph with a simple pie chart.
 
 ## Guardrails
 
