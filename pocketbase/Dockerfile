@@ -16,8 +16,6 @@ COPY start.sh ./start.sh
 
 RUN chmod +x /pb/start.sh
 
-VOLUME ["/pb/pb_data"]
-
 EXPOSE 8090
 
 CMD ["./start.sh"]
