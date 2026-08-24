@@ -28,6 +28,16 @@ function normalizePocketBaseUrl(value: string) {
     };
   }
 
+  const [host, ...pathParts] = trimmed.split("/");
+  if (host.toLowerCase().includes(".up.railway.app")) {
+    return {
+      addedDefaultScheme: true,
+      url: `https://${host.replace(/:\d+$/, "")}${
+        pathParts.length ? `/${pathParts.join("/")}` : ""
+      }`,
+    };
+  }
+
   return {
     addedDefaultScheme: true,
     url: `http://${trimmed}`,

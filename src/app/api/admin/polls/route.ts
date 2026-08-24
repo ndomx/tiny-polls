@@ -1,30 +1,24 @@
-import { NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/admin-auth";
 import { createPoll } from "@/lib/polls";
+import { redirectTo } from "@/lib/redirect";
 
-function redirectWithError(request: Request, error: string) {
-  const url = new URL("/admin/polls/new", request.url);
-  url.searchParams.set("error", error);
-  return NextResponse.redirect(url, { status: 303 });
+function redirectWithError(error: string) {
+  const params = new URLSearchParams({ error });
+  return redirectTo(`/admin/polls/new?${params.toString()}`);
 }
 
 export async function POST(request: Request) {
   const session = await getAdminSession();
 
   if (!session) {
-    return NextResponse.redirect(
-      new URL("/admin/login?next=/admin/polls/new", request.url),
-      {
-        status: 303,
-      },
-    );
+    return redirectTo("/admin/login?next=/admin/polls/new");
   }
 
   const result = await createPoll(await request.formData());
 
   if ("error" in result) {
-    return redirectWithError(request, result.error);
+    return redirectWithError(result.error);
   }
 
-  return NextResponse.redirect(new URL("/admin", request.url), { status: 303 });
+  return redirectTo("/admin");
 }

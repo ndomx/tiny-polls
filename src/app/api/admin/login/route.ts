@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
 import {
   adminCookieName,
   adminCookieOptions,
   authenticateAdmin,
   getSafeRedirectPath,
 } from "@/lib/admin-auth";
+import { redirectTo } from "@/lib/redirect";
 
 function formValue(form: FormData, key: string) {
   return String(form.get(key) || "").trim();
@@ -19,19 +19,16 @@ export async function POST(request: Request) {
   const session = await authenticateAdmin(identity, password);
 
   if (!session) {
-    const url = new URL("/admin/login", request.url);
-    url.searchParams.set("error", "1");
+    const params = new URLSearchParams({ error: "1" });
 
     if (nextPath !== "/") {
-      url.searchParams.set("next", nextPath);
+      params.set("next", nextPath);
     }
 
-    return NextResponse.redirect(url, { status: 303 });
+    return redirectTo(`/admin/login?${params.toString()}`);
   }
 
-  const response = NextResponse.redirect(new URL(nextPath, request.url), {
-    status: 303,
-  });
+  const response = redirectTo(nextPath);
 
   response.cookies.set(adminCookieName, session.token, adminCookieOptions());
 

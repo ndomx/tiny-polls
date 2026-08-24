@@ -1,6 +1,7 @@
 import { cookies, headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { getPoll, isExpired } from "@/lib/polls";
+import { redirectTo } from "@/lib/redirect";
 import { saveSubmission } from "@/lib/submissions";
 import { getOrCreateVoterId, voterCookieName } from "@/lib/voter";
 
@@ -45,9 +46,8 @@ export async function POST(request: Request, context: VoteRouteContext) {
     return new NextResponse(result.error, { status: 400 });
   }
 
-  const response = NextResponse.redirect(
-    new URL(`/polls/${encodeURIComponent(poll.codename)}/results`, request.url),
-    { status: 303 },
+  const response = redirectTo(
+    `/polls/${encodeURIComponent(poll.codename)}/results`,
   );
 
   response.cookies.set(voterCookieName, voterId, {
