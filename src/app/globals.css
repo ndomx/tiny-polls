@@ -320,25 +320,39 @@ textarea {
   align-items: center;
 }
 
-.shareLinks {
+.ownerHeroTools {
+  align-self: stretch;
   display: grid;
-  gap: 8px;
-  min-width: 190px;
+  gap: 10px;
+  min-width: min(360px, 38vw);
 }
 
-.shareLinks a,
-.shareLinks button {
-  background: transparent;
-  border: 1px solid var(--line);
+.sourceCopy {
+  align-items: end;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.sourceCopy .primaryButton {
+  min-height: 48px;
+  white-space: nowrap;
+}
+
+.signOutButton {
+  background: #fff;
+  border: 1px solid #d9b6a7;
   border-radius: 6px;
-  color: inherit;
+  color: #873b22;
   cursor: pointer;
-  display: block;
   font-weight: 800;
-  padding: 10px 12px;
-  text-align: left;
-  text-decoration: none;
+  min-height: 44px;
+  padding: 0 16px;
   width: 100%;
+}
+
+.signOutButton:hover {
+  background: #f7e3d8;
 }
 
 .resultsShell {
@@ -799,6 +813,7 @@ textarea {
   .formGrid,
   .adminOptionRow,
   .pieChartWrap,
+  .sourceCopy,
   .pieLegendRow {
     grid-template-columns: 1fr;
   }

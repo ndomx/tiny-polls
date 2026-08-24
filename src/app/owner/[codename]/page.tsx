@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { Notice } from "@/components/notice";
 import { ResultsShell } from "@/components/results-shell";
+import { SourceLinkCopy } from "@/components/source-link-copy";
 import { getAdminSession } from "@/lib/admin-auth";
 import { getResults } from "@/lib/submissions";
 
@@ -45,12 +46,12 @@ export default async function OwnerPage({ params }: OwnerPageProps) {
           <h1>{results.poll.name}</h1>
           <p>Private voter details, source tracking, and live results.</p>
         </div>
-        <div className="shareLinks">
-          <a href={`${shareBase}?source=family`}>Family Link</a>
-          <a href={`${shareBase}?source=friends`}>Friends Link</a>
-          <a href={`${shareBase}?source=group`}>Group Link</a>
+        <div className="ownerHeroTools">
+          <SourceLinkCopy pollPath={shareBase} />
           <form action="/api/admin/logout" method="post">
-            <button type="submit">Sign Out</button>
+            <button className="signOutButton" type="submit">
+              Sign Out
+            </button>
           </form>
         </div>
       </section>
