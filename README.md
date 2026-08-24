@@ -118,6 +118,43 @@ pocketbase/pb_data
 
 Keep `pocketbase/pb_data` backed up if the local data matters.
 
+## Railway PocketBase Service
+
+Create a second Railway service for PocketBase using the `pocketbase` directory
+as the service root. The service should build from:
+
+```text
+pocketbase/Dockerfile
+```
+
+The image downloads the Linux PocketBase binary, copies
+`pocketbase/pb_migrations`, runs migrations on startup, optionally upserts a
+superuser, and starts PocketBase with:
+
+```text
+./pocketbase serve --http=0.0.0.0:${PORT:-8090} --dir=/pb/pb_data --migrationsDir=/pb/pb_migrations
+```
+
+Mount a Railway volume at:
+
+```text
+/pb/pb_data
+```
+
+Point the Next.js service at the PocketBase service URL:
+
+```text
+POCKETBASE_URL=https://<your-pocketbase-service>.up.railway.app
+```
+
+Set these on both the PocketBase service and the Next.js service so the app can
+authenticate with PocketBase:
+
+```text
+POCKETBASE_SUPERUSER_EMAIL=you@example.com
+POCKETBASE_SUPERUSER_PASSWORD=change-this-pocketbase-password
+```
+
 ## Troubleshooting
 
 If voting fails with a PocketBase validation error for `isCorrect`, restart
