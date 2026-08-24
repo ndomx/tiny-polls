@@ -1,3 +1,5 @@
+import { logger } from "@/lib/logger";
+
 type PocketBaseListQuery = Record<string, string | number | boolean>;
 
 export type PocketBaseListResponse<T> = {
@@ -14,15 +16,43 @@ type PocketBaseRequestOptions = RequestInit & {
 
 let cachedToken = "";
 let cachedTokenExpiresAt = 0;
+let hasLoggedPocketBaseConfig = false;
 
 export function appConfig() {
-  return {
+  const rawPocketbaseUrl =
+    process.env.POCKETBASE_URL || "http://127.0.0.1:8090";
+  const config = {
     pocketbaseUrl: (
       process.env.POCKETBASE_URL || "http://127.0.0.1:8090"
     ).replace(/\/$/, ""),
     pocketbaseEmail: process.env.POCKETBASE_SUPERUSER_EMAIL || "",
     pocketbasePassword: process.env.POCKETBASE_SUPERUSER_PASSWORD || "",
   };
+
+  if (!hasLoggedPocketBaseConfig) {
+    hasLoggedPocketBaseConfig = true;
+    logger.info(
+      {
+        hasPocketbaseEmail: Boolean(config.pocketbaseEmail),
+        hasPocketbasePassword: Boolean(config.pocketbasePassword),
+        pocketbaseUrl: config.pocketbaseUrl,
+        pocketbaseUrlContainsRailwayTemplate: rawPocketbaseUrl.includes("${{"),
+        pocketbaseUrlRaw: rawPocketbaseUrl,
+      },
+      "PocketBase configuration loaded",
+    );
+
+    try {
+      new URL(config.pocketbaseUrl);
+    } catch (err) {
+      logger.error(
+        { err, pocketbaseUrl: config.pocketbaseUrl },
+        "PocketBase URL is not a valid URL",
+      );
+    }
+  }
+
+  return config;
 }
 
 function requirePocketBaseCredentials() {
@@ -48,25 +78,51 @@ async function authenticatePocketBase() {
   }
 
   const config = requirePocketBaseCredentials();
-  const response = await fetch(
-    pocketbaseUrl("/api/collections/_superusers/auth-with-password"),
-    {
+  const path = "/api/collections/_superusers/auth-with-password";
+  const url = pocketbaseUrl(path);
+  const startedAt = Date.now();
+
+  logger.debug({ path, url }, "Authenticating PocketBase superuser");
+
+  let response: Response;
+
+  try {
+    response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         identity: config.pocketbaseEmail,
         password: config.pocketbasePassword,
       }),
-    },
-  );
+    });
+  } catch (err) {
+    logger.error(
+      { durationMs: Date.now() - startedAt, err, path, url },
+      "PocketBase superuser authentication request failed",
+    );
+    throw err;
+  }
 
   if (!response.ok) {
+    logger.error(
+      {
+        durationMs: Date.now() - startedAt,
+        path,
+        status: response.status,
+        url,
+      },
+      "PocketBase superuser authentication failed",
+    );
     throw new Error(`PocketBase login failed with HTTP ${response.status}.`);
   }
 
   const body = (await response.json()) as { token: string };
   cachedToken = body.token;
   cachedTokenExpiresAt = now + 1000 * 60 * 30;
+  logger.debug(
+    { durationMs: Date.now() - startedAt, path, status: response.status, url },
+    "PocketBase superuser authenticated",
+  );
   return cachedToken;
 }
 
@@ -85,22 +141,64 @@ export async function pocketBaseRequest<T>(
     headers.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(pocketbaseUrl(path), {
-    ...requestOptions,
-    headers,
-  });
+  const method = requestOptions.method || "GET";
+  const url = pocketbaseUrl(path);
+  const startedAt = Date.now();
+
+  logger.debug({ method, path, skipAuth, url }, "PocketBase request started");
+
+  let response: Response;
+
+  try {
+    response = await fetch(url, {
+      ...requestOptions,
+      headers,
+    });
+  } catch (err) {
+    logger.error(
+      { durationMs: Date.now() - startedAt, err, method, path, skipAuth, url },
+      "PocketBase request failed before response",
+    );
+    throw err;
+  }
 
   if (response.status === 401 && !skipAuth) {
+    logger.warn(
+      { durationMs: Date.now() - startedAt, method, path, status: 401, url },
+      "PocketBase request returned 401; refreshing auth token",
+    );
     cachedToken = "";
     cachedTokenExpiresAt = 0;
     return pocketBaseRequest<T>(path, options);
   }
 
   if (!response.ok) {
+    const body = await response.text();
+    logger.error(
+      {
+        body,
+        durationMs: Date.now() - startedAt,
+        method,
+        path,
+        status: response.status,
+        url,
+      },
+      "PocketBase request returned an error response",
+    );
     throw new Error(
-      `PocketBase request failed with HTTP ${response.status}: ${await response.text()}`,
+      `PocketBase request failed with HTTP ${response.status}: ${body}`,
     );
   }
+
+  logger.debug(
+    {
+      durationMs: Date.now() - startedAt,
+      method,
+      path,
+      status: response.status,
+    },
+    "PocketBase request completed",
+  );
 
   if (response.status === 204) {
     return null as T;
