@@ -18,13 +18,28 @@ let cachedToken = "";
 let cachedTokenExpiresAt = 0;
 let hasLoggedPocketBaseConfig = false;
 
+function normalizePocketBaseUrl(value: string) {
+  const trimmed = value.trim().replace(/\/$/, "");
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return {
+      addedDefaultScheme: false,
+      url: trimmed,
+    };
+  }
+
+  return {
+    addedDefaultScheme: true,
+    url: `http://${trimmed}`,
+  };
+}
+
 export function appConfig() {
   const rawPocketbaseUrl =
     process.env.POCKETBASE_URL || "http://127.0.0.1:8090";
+  const normalizedPocketbaseUrl = normalizePocketBaseUrl(rawPocketbaseUrl);
   const config = {
-    pocketbaseUrl: (
-      process.env.POCKETBASE_URL || "http://127.0.0.1:8090"
-    ).replace(/\/$/, ""),
+    pocketbaseUrl: normalizedPocketbaseUrl.url,
     pocketbaseEmail: process.env.POCKETBASE_SUPERUSER_EMAIL || "",
     pocketbasePassword: process.env.POCKETBASE_SUPERUSER_PASSWORD || "",
   };
@@ -35,6 +50,8 @@ export function appConfig() {
       {
         hasPocketbaseEmail: Boolean(config.pocketbaseEmail),
         hasPocketbasePassword: Boolean(config.pocketbasePassword),
+        pocketbaseUrlAddedDefaultScheme:
+          normalizedPocketbaseUrl.addedDefaultScheme,
         pocketbaseUrl: config.pocketbaseUrl,
         pocketbaseUrlContainsRailwayTemplate: rawPocketbaseUrl.includes("${{"),
         pocketbaseUrlRaw: rawPocketbaseUrl,
