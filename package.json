@@ -26,9 +26,9 @@
   "devEngines": {
     "packageManager": {
       "name": "npm",
-      "version": "^12.0.2",
+      "version": "^11.17.0",
       "onFail": "warn"
     }
   },
-  "packageManager": "npm@12.0.2+sha512.b885e890b9418fa1693544d05f53e64f9a73ec194837d4258b15fecdd692347b1dd2a517b1b0cbaf9d31cd8e92c3b70956bd2ecc72833a57b4b3098f5bfa7943"
+  "packageManager": "npm@11.17.0+sha512.3eeaf18997b11070d313849268b23766b9db0068997dec9471073170fe43fa17f2b4d0337bf0f52330ee2274e7f5754b21b01052742e48f5c9c74d8b1e32ef43"
 }
