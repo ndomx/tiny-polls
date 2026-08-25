@@ -1,15 +1,25 @@
-import { formatClock } from "@/lib/format";
+import { type Dictionary, formatMessage } from "@/i18n/get-dictionary";
+import type { Locale } from "@/i18n/locales";
+import { formatClock, formatShortTime } from "@/lib/format";
 import type { ResultsPayload, Submission } from "@/lib/submissions";
 import { shortVoterId } from "@/lib/voter";
 
 const colors = ["#176b5b", "#d96c3d", "#3656a6", "#a33f63", "#6d7f2f"];
 
 type ResultsShellProps = {
+  dictionary: Dictionary;
+  locale: Locale;
   results: ResultsPayload;
   owner?: boolean;
 };
 
-export function ResultsShell({ results, owner = false }: ResultsShellProps) {
+export function ResultsShell({
+  dictionary,
+  locale,
+  results,
+  owner = false,
+}: ResultsShellProps) {
+  const labels = dictionary.resultsShell;
   const totalSelections = Math.max(
     1,
     results.options.reduce((sum, option) => sum + option.count, 0),
@@ -19,10 +29,12 @@ export function ResultsShell({ results, owner = false }: ResultsShellProps) {
     <section className="resultsShell" aria-live="polite">
       <div className="sectionHeader">
         <div>
-          <p className="eyebrow">Live Results</p>
-          <h2>Current Vote Count</h2>
+          <p className="eyebrow">{labels.liveResults}</p>
+          <h2>{labels.currentVoteCount}</h2>
         </div>
-        <p className="muted">Updated {formatClock()}</p>
+        <p className="muted">
+          {formatMessage(labels.updated, { time: formatClock(locale) })}
+        </p>
       </div>
 
       <div className="currentResults">
@@ -35,7 +47,9 @@ export function ResultsShell({ results, owner = false }: ResultsShellProps) {
               <div className="resultLabel">
                 <span className="swatch" style={{ background: color }} />
                 <strong>{option.label}</strong>
-                <span>{option.count} votes</span>
+                <span>
+                  {option.count} {labels.votes}
+                </span>
               </div>
               <div className="barTrack">
                 <div
@@ -52,15 +66,25 @@ export function ResultsShell({ results, owner = false }: ResultsShellProps) {
       <div className="chartPanel">
         <div className="sectionHeader compact">
           <div>
-            <p className="eyebrow">Share</p>
-            <h2>Vote Distribution</h2>
+            <p className="eyebrow">{labels.share}</p>
+            <h2>{labels.voteDistribution}</h2>
           </div>
-          <p className="muted">{results.totalVotes} total submissions</p>
+          <p className="muted">
+            {formatMessage(labels.totalSubmissions, {
+              count: results.totalVotes,
+            })}
+          </p>
         </div>
-        <PieChart results={results} />
+        <PieChart dictionary={dictionary} results={results} />
       </div>
 
-      {owner ? <OwnerDetails results={results} /> : null}
+      {owner ? (
+        <OwnerDetails
+          dictionary={dictionary}
+          locale={locale}
+          results={results}
+        />
+      ) : null}
     </section>
   );
 }
@@ -88,7 +112,14 @@ function pieSlicePath(
   ].join(" ");
 }
 
-function PieChart({ results }: { results: ResultsPayload }) {
+function PieChart({
+  dictionary,
+  results,
+}: {
+  dictionary: Dictionary;
+  results: ResultsPayload;
+}) {
+  const labels = dictionary.resultsShell;
   const totalSelections = results.options.reduce(
     (sum, option) => sum + option.count,
     0,
@@ -98,7 +129,7 @@ function PieChart({ results }: { results: ResultsPayload }) {
   return (
     <div className="pieChartWrap">
       <svg className="pieChart" viewBox="0 0 240 240" role="img">
-        <title>Vote distribution</title>
+        <title>{labels.voteDistribution}</title>
         {totalSelections === 0 ? (
           <circle cx="120" cy="120" fill="#ece3d7" r="96" />
         ) : (
@@ -125,7 +156,7 @@ function PieChart({ results }: { results: ResultsPayload }) {
           {totalSelections}
         </text>
         <text className="pieTotalLabel" x="120" y="138">
-          votes
+          {labels.votes}
         </text>
       </svg>
 
@@ -144,7 +175,7 @@ function PieChart({ results }: { results: ResultsPayload }) {
               />
               <strong>{option.label}</strong>
               <span>
-                {option.count} votes · {percentage}%
+                {option.count} {labels.votes} - {percentage}%
               </span>
             </div>
           );
@@ -154,19 +185,29 @@ function PieChart({ results }: { results: ResultsPayload }) {
   );
 }
 
-function OwnerDetails({ results }: { results: ResultsPayload }) {
+function OwnerDetails({
+  dictionary,
+  locale,
+  results,
+}: {
+  dictionary: Dictionary;
+  locale: Locale;
+  results: ResultsPayload;
+}) {
+  const labels = dictionary.resultsShell;
+
   return (
     <div className="ownerGrid">
       <section className="ownerPanel">
         <div className="sectionHeader compact">
           <div>
-            <p className="eyebrow">Sources</p>
-            <h2>Where Votes Came From</h2>
+            <p className="eyebrow">{labels.sources}</p>
+            <h2>{labels.whereVotesCameFrom}</h2>
           </div>
         </div>
         <div className="sourceList">
           {results.sources.length === 0 ? (
-            <p className="muted">No source data yet.</p>
+            <p className="muted">{labels.noSourceData}</p>
           ) : (
             results.sources.map((source) => (
               <div className="sourceRow" key={source.source}>
@@ -181,21 +222,23 @@ function OwnerDetails({ results }: { results: ResultsPayload }) {
       <section className="ownerPanel">
         <div className="sectionHeader compact">
           <div>
-            <p className="eyebrow">Private</p>
-            <h2>Submissions</h2>
+            <p className="eyebrow">{labels.private}</p>
+            <h2>{labels.submissions}</h2>
           </div>
         </div>
         <div className="submissionList">
           {results.submissions?.length ? (
             results.submissions.map((submission) => (
               <SubmissionCard
+                dictionary={dictionary}
                 key={submission.id}
+                locale={locale}
                 submission={submission}
                 results={results}
               />
             ))
           ) : (
-            <p className="muted">No submissions yet.</p>
+            <p className="muted">{labels.noSubmissions}</p>
           )}
         </div>
       </section>
@@ -204,12 +247,17 @@ function OwnerDetails({ results }: { results: ResultsPayload }) {
 }
 
 function SubmissionCard({
+  dictionary,
+  locale,
   results,
   submission,
 }: {
+  dictionary: Dictionary;
+  locale: Locale;
   results: ResultsPayload;
   submission: Submission;
 }) {
+  const labels = dictionary.resultsShell;
   const answers = submission.selectedOptions
     .map(
       (id) =>
@@ -221,16 +269,20 @@ function SubmissionCard({
     <article className="submissionCard">
       <div>
         <strong>{submission.voterName}</strong>
-        <span>Voter {shortVoterId(submission.voterId)}</span>
+        <span>
+          {formatMessage(labels.voter, {
+            id: shortVoterId(submission.voterId),
+          })}
+        </span>
       </div>
       <div>
         <span>{answers}</span>
         <span>
-          {submission.source} - {submission.createdAt}
+          {submission.source} - {formatShortTime(submission.createdAt, locale)}
         </span>
       </div>
       <span className={submission.isCorrect ? "winnerBadge" : "plainBadge"}>
-        {submission.isCorrect ? "Correct" : "Not correct"}
+        {submission.isCorrect ? dictionary.common.correct : labels.notCorrect}
       </span>
     </article>
   );

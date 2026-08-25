@@ -1,3 +1,4 @@
+import { getLocale, withLocale } from "@/i18n/locales";
 import {
   adminCookieName,
   adminCookieOptions,
@@ -14,6 +15,7 @@ export async function POST(request: Request) {
   const form = await request.formData();
   const identity = formValue(form, "email");
   const password = formValue(form, "password");
+  const locale = getLocale(form.get("locale"));
   const nextPath = getSafeRedirectPath(formValue(form, "next"));
 
   const session = await authenticateAdmin(identity, password);
@@ -25,7 +27,7 @@ export async function POST(request: Request) {
       params.set("next", nextPath);
     }
 
-    return redirectTo(`/admin/login?${params.toString()}`);
+    return redirectTo(withLocale(locale, `/admin/login?${params.toString()}`));
   }
 
   const response = redirectTo(nextPath);

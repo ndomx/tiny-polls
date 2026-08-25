@@ -34,11 +34,37 @@ A tiny local-first poll app backed by PocketBase.
 - Existing owner pages and owner APIs are protected by a PocketBase-authenticated admin session.
 - Owner pages include generated share links for `family`, `friends`, and `group` source tracking.
 - PocketBase migrations create the required `polls` and `submissions` collections and seed one local demo poll.
+- The UI supports locale-prefixed English and Spanish routes at `/en/...` and `/es/...`.
 
 ## Missing Work
 
 - Consider replacing superuser-backed app login with a dedicated PocketBase `admins` auth collection before the admin surface grows.
 - Add tests around closed-poll rejection, duplicate-voter update behavior, public/private result payloads, admin auth, and poll create/edit/delete flows.
+- Add translated poll-authored content to the PocketBase data model if poll questions, descriptions, and answer labels need per-locale variants.
+
+## I18n Implementation
+
+The app uses a lightweight dictionary-based i18n layer without an external i18n
+package.
+
+- Supported locales live in `src/i18n/locales.ts`.
+- UI dictionaries live in `src/i18n/dictionaries/en.json` and
+  `src/i18n/dictionaries/es.json`.
+- Page routes live under `src/app/[locale]/...`; API routes stay unprefixed
+  under `src/app/api/...`.
+- `src/proxy.ts` redirects unprefixed page routes to the remembered locale
+  cookie or the default Spanish locale.
+- Server Components load copy with `getDictionary(locale)`.
+- Client Components receive translated labels from their parent Server
+  Component.
+- Date and time formatting uses the active locale through `src/lib/format.ts`.
+- Admin validation returns stable error codes that pages map to localized
+  messages.
+- PocketBase-authored poll content remains in the language entered by the admin.
+
+A package such as `next-intl` can still be introduced later if the app needs
+richer client-side translation hooks, pluralization helpers, locale-aware
+navigation wrappers, or more advanced routing behavior.
 
 ## Guardrails
 
@@ -93,13 +119,14 @@ http://127.0.0.1:3000/polls/baby-guess-stage-1
 ## Reference Routes
 
 ```text
-/polls/<codename>
-/polls/<codename>/results
-/admin
-/admin/login
-/admin/polls/new
-/admin/polls/<codename>/edit
-/owner/<codename>
+/<locale>
+/<locale>/polls/<codename>
+/<locale>/polls/<codename>/results
+/<locale>/admin
+/<locale>/admin/login
+/<locale>/admin/polls/new
+/<locale>/admin/polls/<codename>/edit
+/<locale>/owner/<codename>
 ```
 
 ## PocketBase Files

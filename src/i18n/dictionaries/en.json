@@ -1,0 +1,132 @@
+{
+  "metadata": {
+    "title": "Tiny Polls",
+    "description": "A tiny local-first poll app."
+  },
+  "common": {
+    "appName": "Tiny Polls",
+    "admin": "Admin",
+    "ownerDashboard": "Owner Dashboard",
+    "poll": "Poll",
+    "closes": "Closes",
+    "correct": "Correct",
+    "signOut": "Sign Out",
+    "cancel": "Cancel",
+    "vote": "Vote",
+    "results": "Results",
+    "edit": "Edit",
+    "source": "Source",
+    "copied": "Copied",
+    "copyLink": "Copy Link",
+    "sourcePlaceholder": "family, friends, group..."
+  },
+  "home": {
+    "title": "Use the poll link you were sent",
+    "description": "Polls are private by link and are not listed here."
+  },
+  "notice": {
+    "pollNotFoundTitle": "Poll not found",
+    "pollNotFoundMessage": "This link does not match a poll.",
+    "pollNotEditableMessage": "This poll cannot be edited because it does not exist."
+  },
+  "pollPage": {
+    "yourName": "Your name",
+    "chooseOne": "Choose one answer",
+    "chooseRange": "Choose {min}-{max} answers",
+    "closed": "This poll is closed.",
+    "correctAnswerIs": "The correct answer is",
+    "correctAnswerNotSet": "The correct answer has not been set yet.",
+    "updateVote": "Update Vote",
+    "submitVote": "Submit Vote"
+  },
+  "resultsPage": {
+    "thanks": "Thanks for voting",
+    "description": "Results are anonymous here and refresh automatically.",
+    "editVote": "Edit Vote"
+  },
+  "resultsShell": {
+    "liveResults": "Live Results",
+    "currentVoteCount": "Current Vote Count",
+    "updated": "Updated {time}",
+    "votes": "votes",
+    "share": "Share",
+    "voteDistribution": "Vote Distribution",
+    "totalSubmissions": "{count} total submissions",
+    "sources": "Sources",
+    "whereVotesCameFrom": "Where Votes Came From",
+    "noSourceData": "No source data yet.",
+    "private": "Private",
+    "submissions": "Submissions",
+    "noSubmissions": "No submissions yet.",
+    "voter": "Voter {id}",
+    "notCorrect": "Not correct"
+  },
+  "ownerPage": {
+    "description": "Private voter details, source tracking, and live results."
+  },
+  "adminPage": {
+    "title": "Polls",
+    "description": "All PocketBase polls currently available to Tiny Polls.",
+    "newPoll": "New Poll",
+    "index": "Index",
+    "pollCount": "{count} polls",
+    "empty": "No polls have been created yet.",
+    "codename": "Codename",
+    "options": "Options",
+    "actionsLabel": "{name} actions",
+    "closePoll": "Close Poll",
+    "removePoll": "Remove Poll"
+  },
+  "login": {
+    "title": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "rejected": "PocketBase rejected those credentials.",
+    "submit": "Sign In"
+  },
+  "pollForm": {
+    "codename": "Codename",
+    "status": "Status",
+    "statusDraft": "Draft",
+    "statusOpen": "Open",
+    "statusClosed": "Closed",
+    "name": "Name",
+    "question": "Question",
+    "description": "Description",
+    "stage": "Stage",
+    "audience": "Audience",
+    "closes": "Closes",
+    "createPoll": "Create Poll",
+    "savePoll": "Save Poll"
+  },
+  "optionsEditor": {
+    "answers": "Answers",
+    "setLater": "Set Later",
+    "addOption": "Add Option",
+    "option": "Option {number}",
+    "correct": "Correct",
+    "removeOption": "Remove option {number}"
+  },
+  "newPoll": {
+    "title": "New Poll",
+    "description": "Create a single-correct-answer multiple-choice poll."
+  },
+  "editPoll": {
+    "title": "Edit Poll"
+  },
+  "errors": {
+    "codenameInvalid": "Codename must be lowercase letters, numbers, and hyphens, with at least two characters.",
+    "pollNameRequired": "Poll name is required.",
+    "questionRequired": "Question is required.",
+    "statusInvalid": "Status must be draft, open, or closed.",
+    "closeTimeRequired": "Close time is required.",
+    "openPollNeedsFutureCloseTime": "Open polls need a future close time.",
+    "notEnoughOptions": "Add at least two answer options.",
+    "correctAnswerInvalid": "Choose a filled option as the correct answer or set it later.",
+    "codenameTaken": "A poll with that codename already exists.",
+    "pollNotFound": "Poll not found.",
+    "pollClosed": "Poll is closed.",
+    "nameRequired": "Name is required",
+    "invalidAnswerCount": "Invalid number of answers"
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "metadata": {
+    "title": "Tiny Polls",
+    "description": "Una app pequena de encuestas locales."
+  },
+  "common": {
+    "appName": "Tiny Polls",
+    "admin": "Admin",
+    "ownerDashboard": "Panel del dueno",
+    "poll": "Encuesta",
+    "closes": "Cierra",
+    "correct": "Correcta",
+    "signOut": "Cerrar sesion",
+    "cancel": "Cancelar",
+    "vote": "Votar",
+    "results": "Resultados",
+    "edit": "Editar",
+    "source": "Fuente",
+    "copied": "Copiado",
+    "copyLink": "Copiar enlace",
+    "sourcePlaceholder": "familia, amigos, grupo..."
+  },
+  "home": {
+    "title": "Usa el enlace de encuesta que recibiste",
+    "description": "Las encuestas son privadas por enlace y no se listan aqui."
+  },
+  "notice": {
+    "pollNotFoundTitle": "Encuesta no encontrada",
+    "pollNotFoundMessage": "Este enlace no corresponde a una encuesta.",
+    "pollNotEditableMessage": "Esta encuesta no se puede editar porque no existe."
+  },
+  "pollPage": {
+    "yourName": "Tu nombre",
+    "chooseOne": "Elige una respuesta",
+    "chooseRange": "Elige {min}-{max} respuestas",
+    "closed": "Esta encuesta esta cerrada.",
+    "correctAnswerIs": "La respuesta correcta es",
+    "correctAnswerNotSet": "La respuesta correcta aun no se ha definido.",
+    "updateVote": "Actualizar voto",
+    "submitVote": "Enviar voto"
+  },
+  "resultsPage": {
+    "thanks": "Gracias por votar",
+    "description": "Los resultados son anonimos aqui y se actualizan automaticamente.",
+    "editVote": "Editar voto"
+  },
+  "resultsShell": {
+    "liveResults": "Resultados en vivo",
+    "currentVoteCount": "Conteo actual de votos",
+    "updated": "Actualizado {time}",
+    "votes": "votos",
+    "share": "Proporcion",
+    "voteDistribution": "Distribucion de votos",
+    "totalSubmissions": "{count} envios en total",
+    "sources": "Fuentes",
+    "whereVotesCameFrom": "De donde vinieron los votos",
+    "noSourceData": "Todavia no hay datos de fuente.",
+    "private": "Privado",
+    "submissions": "Envios",
+    "noSubmissions": "Todavia no hay envios.",
+    "voter": "Votante {id}",
+    "notCorrect": "No correcta"
+  },
+  "ownerPage": {
+    "description": "Detalles privados de votantes, seguimiento de fuentes y resultados en vivo."
+  },
+  "adminPage": {
+    "title": "Encuestas",
+    "description": "Todas las encuestas de PocketBase disponibles actualmente en Tiny Polls.",
+    "newPoll": "Nueva encuesta",
+    "index": "Indice",
+    "pollCount": "{count} encuestas",
+    "empty": "Todavia no se han creado encuestas.",
+    "codename": "Codigo",
+    "options": "Opciones",
+    "actionsLabel": "Acciones para {name}",
+    "closePoll": "Cerrar encuesta",
+    "removePoll": "Eliminar encuesta"
+  },
+  "login": {
+    "title": "Iniciar sesion",
+    "email": "Email",
+    "password": "Contrasena",
+    "rejected": "PocketBase rechazo esas credenciales.",
+    "submit": "Entrar"
+  },
+  "pollForm": {
+    "codename": "Codigo",
+    "status": "Estado",
+    "statusDraft": "Borrador",
+    "statusOpen": "Abierta",
+    "statusClosed": "Cerrada",
+    "name": "Nombre",
+    "question": "Pregunta",
+    "description": "Descripcion",
+    "stage": "Etapa",
+    "audience": "Audiencia",
+    "closes": "Cierra",
+    "createPoll": "Crear encuesta",
+    "savePoll": "Guardar encuesta"
+  },
+  "optionsEditor": {
+    "answers": "Respuestas",
+    "setLater": "Definir despues",
+    "addOption": "Agregar opcion",
+    "option": "Opcion {number}",
+    "correct": "Correcta",
+    "removeOption": "Eliminar opcion {number}"
+  },
+  "newPoll": {
+    "title": "Nueva encuesta",
+    "description": "Crea una encuesta de opcion multiple con una respuesta correcta."
+  },
+  "editPoll": {
+    "title": "Editar encuesta"
+  },
+  "errors": {
+    "codenameInvalid": "El codigo debe usar letras minusculas, numeros y guiones, con al menos dos caracteres.",
+    "pollNameRequired": "El nombre de la encuesta es obligatorio.",
+    "questionRequired": "La pregunta es obligatoria.",
+    "statusInvalid": "El estado debe ser borrador, abierta o cerrada.",
+    "closeTimeRequired": "La hora de cierre es obligatoria.",
+    "openPollNeedsFutureCloseTime": "Las encuestas abiertas necesitan una hora de cierre futura.",
+    "notEnoughOptions": "Agrega al menos dos opciones de respuesta.",
+    "correctAnswerInvalid": "Elige una opcion completada como respuesta correcta o definela despues.",
+    "codenameTaken": "Ya existe una encuesta con ese codigo.",
+    "pollNotFound": "Encuesta no encontrada.",
+    "pollClosed": "La encuesta esta cerrada.",
+    "nameRequired": "El nombre es obligatorio",
+    "invalidAnswerCount": "Cantidad de respuestas invalida"
+  }
+}

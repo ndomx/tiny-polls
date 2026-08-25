@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { AdminOptionsEditor } from "@/components/admin-options-editor";
+import { type Dictionary, formatMessage } from "@/i18n/get-dictionary";
+import { type Locale, withLocale } from "@/i18n/locales";
 import type { Poll, PollOption } from "@/lib/polls";
 
 type AdminPollFormProps = {
   action: string;
+  dictionary: Dictionary;
   error?: string;
+  locale: Locale;
   mode: "create" | "edit";
   poll?: Poll;
 };
@@ -34,17 +38,22 @@ function optionRows(poll?: Poll) {
 
 export function AdminPollForm({
   action,
+  dictionary,
   error = "",
+  locale,
   mode,
   poll,
 }: AdminPollFormProps) {
+  const { common, optionsEditor, pollForm } = dictionary;
+
   return (
     <form action={action} className="adminPollForm" method="post">
+      <input name="locale" type="hidden" value={locale} />
       {error ? <p className="closedNotice">{error}</p> : null}
 
       <div className="formGrid">
         <label className="field">
-          <span>Codename</span>
+          <span>{pollForm.codename}</span>
           <input
             defaultValue={poll?.codename || ""}
             maxLength={120}
@@ -57,17 +66,17 @@ export function AdminPollForm({
         </label>
 
         <label className="field">
-          <span>Status</span>
+          <span>{pollForm.status}</span>
           <select defaultValue={poll?.status || "draft"} name="status" required>
-            <option value="draft">Draft</option>
-            <option value="open">Open</option>
-            <option value="closed">Closed</option>
+            <option value="draft">{pollForm.statusDraft}</option>
+            <option value="open">{pollForm.statusOpen}</option>
+            <option value="closed">{pollForm.statusClosed}</option>
           </select>
         </label>
       </div>
 
       <label className="field">
-        <span>Name</span>
+        <span>{pollForm.name}</span>
         <input
           defaultValue={poll?.name || ""}
           maxLength={160}
@@ -78,7 +87,7 @@ export function AdminPollForm({
       </label>
 
       <label className="field">
-        <span>Question</span>
+        <span>{pollForm.question}</span>
         <textarea
           defaultValue={poll?.question || ""}
           maxLength={500}
@@ -89,7 +98,7 @@ export function AdminPollForm({
       </label>
 
       <label className="field">
-        <span>Description</span>
+        <span>{pollForm.description}</span>
         <textarea
           defaultValue={poll?.description || ""}
           maxLength={1000}
@@ -100,7 +109,7 @@ export function AdminPollForm({
 
       <div className="formGrid">
         <label className="field">
-          <span>Stage</span>
+          <span>{pollForm.stage}</span>
           <input
             defaultValue={poll?.stage || ""}
             maxLength={120}
@@ -110,7 +119,7 @@ export function AdminPollForm({
         </label>
 
         <label className="field">
-          <span>Audience</span>
+          <span>{pollForm.audience}</span>
           <input
             defaultValue={poll?.audience || ""}
             maxLength={160}
@@ -120,7 +129,7 @@ export function AdminPollForm({
         </label>
 
         <label className="field">
-          <span>Closes</span>
+          <span>{pollForm.closes}</span>
           <input
             defaultValue={dateTimeLocalValue(poll?.expiresAt)}
             name="expiresAt"
@@ -132,15 +141,24 @@ export function AdminPollForm({
 
       <AdminOptionsEditor
         correctAnswerId={poll?.correctAnswerIds[0]}
+        labels={{
+          addOption: optionsEditor.addOption,
+          answers: optionsEditor.answers,
+          correct: optionsEditor.correct,
+          option: (number) => formatMessage(optionsEditor.option, { number }),
+          removeOption: (number) =>
+            formatMessage(optionsEditor.removeOption, { number }),
+          setLater: optionsEditor.setLater,
+        }}
         options={optionRows(poll)}
       />
 
       <div className="formActions">
         <button className="primaryButton" type="submit">
-          {mode === "create" ? "Create Poll" : "Save Poll"}
+          {mode === "create" ? pollForm.createPoll : pollForm.savePoll}
         </button>
-        <Link className="secondaryButton" href="/admin">
-          Cancel
+        <Link className="secondaryButton" href={withLocale(locale, "/admin")}>
+          {common.cancel}
         </Link>
       </div>
     </form>

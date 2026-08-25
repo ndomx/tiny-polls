@@ -26,8 +26,20 @@ export type Poll = {
   options: PollOption[];
 };
 
+export type PollMutationErrorCode =
+  | "codenameInvalid"
+  | "pollNameRequired"
+  | "questionRequired"
+  | "statusInvalid"
+  | "closeTimeRequired"
+  | "openPollNeedsFutureCloseTime"
+  | "notEnoughOptions"
+  | "correctAnswerInvalid"
+  | "codenameTaken"
+  | "pollNotFound";
+
 export type PollMutationResult =
-  | { error: string }
+  | { errorCode: PollMutationErrorCode }
   | { ok: true; poll: Poll | null };
 
 type PocketBasePollRecord = {
@@ -173,7 +185,7 @@ function optionIdFromLabel(label: string, index: number, usedIds: Set<string>) {
 function pollInputFromForm(
   form: FormData,
   existingPoll?: Poll,
-): { error: string } | { input: PollMutationInput } {
+): { errorCode: PollMutationErrorCode } | { input: PollMutationInput } {
   const codename = existingPoll?.codename || formValue(form, "codename");
   const name = formValue(form, "name");
   const question = formValue(form, "question");
@@ -189,30 +201,27 @@ function pollInputFromForm(
   const usedOptionIds = new Set<string>();
 
   if (!/^[a-z0-9][a-z0-9-]{1,119}$/.test(codename)) {
-    return {
-      error:
-        "Codename must be lowercase letters, numbers, and hyphens, with at least two characters.",
-    };
+    return { errorCode: "codenameInvalid" };
   }
 
   if (!name) {
-    return { error: "Poll name is required." };
+    return { errorCode: "pollNameRequired" };
   }
 
   if (!question) {
-    return { error: "Question is required." };
+    return { errorCode: "questionRequired" };
   }
 
   if (!status) {
-    return { error: "Status must be draft, open, or closed." };
+    return { errorCode: "statusInvalid" };
   }
 
   if (Number.isNaN(expiresAt.getTime())) {
-    return { error: "Close time is required." };
+    return { errorCode: "closeTimeRequired" };
   }
 
   if (status === "open" && expiresAt.getTime() <= Date.now()) {
-    return { error: "Open polls need a future close time." };
+    return { errorCode: "openPollNeedsFutureCloseTime" };
   }
 
   for (let index = 0; index < 8; index += 1) {
@@ -242,7 +251,7 @@ function pollInputFromForm(
   const options = optionRows.map((row) => row.option);
 
   if (options.length < 2) {
-    return { error: "Add at least two answer options." };
+    return { errorCode: "notEnoughOptions" };
   }
 
   const correctAnswer =
@@ -251,15 +260,11 @@ function pollInputFromForm(
       : optionRows.find((row) => row.rowIndex === correctOption)?.option;
 
   if (correctOptionInput !== "" && !/^\d+$/.test(correctOptionInput)) {
-    return {
-      error: "Choose a filled option as the correct answer or set it later.",
-    };
+    return { errorCode: "correctAnswerInvalid" };
   }
 
   if (correctOptionInput !== "" && !correctAnswer) {
-    return {
-      error: "Choose a filled option as the correct answer or set it later.",
-    };
+    return { errorCode: "correctAnswerInvalid" };
   }
 
   return {
@@ -388,14 +393,14 @@ async function syncSubmissionCorrectness(poll: Poll) {
 export async function createPoll(form: FormData): Promise<PollMutationResult> {
   const result = pollInputFromForm(form);
 
-  if ("error" in result) {
+  if ("errorCode" in result) {
     return result;
   }
 
   const existing = await getPoll(result.input.codename);
 
   if (existing) {
-    return { error: "A poll with that codename already exists." };
+    return { errorCode: "codenameTaken" };
   }
 
   await ensurePollSchemaAllowsDeferredCorrectAnswer();
@@ -422,12 +427,12 @@ export async function updatePoll(
   const poll = await getPoll(codename);
 
   if (!poll) {
-    return { error: "Poll not found." };
+    return { errorCode: "pollNotFound" };
   }
 
   const result = pollInputFromForm(form, poll);
 
-  if ("error" in result) {
+  if ("errorCode" in result) {
     return result;
   }
 

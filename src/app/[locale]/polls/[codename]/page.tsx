@@ -1,5 +1,8 @@
 import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/notice";
+import { formatMessage, getDictionary } from "@/i18n/get-dictionary";
+import { isLocale } from "@/i18n/locales";
 import { formatDateTime } from "@/lib/format";
 import { getPoll, isExpired } from "@/lib/polls";
 import { getSubmissionForVoter } from "@/lib/submissions";
@@ -8,7 +11,7 @@ import { isValidVoterId, voterCookieName } from "@/lib/voter";
 export const dynamic = "force-dynamic";
 
 type PollPageProps = {
-  params: Promise<{ codename: string }>;
+  params: Promise<{ codename: string; locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
@@ -24,15 +27,22 @@ export default async function PollPage({
   params,
   searchParams,
 }: PollPageProps) {
-  const { codename } = await params;
+  const { codename, locale } = await params;
+
+  if (!isLocale(locale)) {
+    notFound();
+  }
+
+  const dictionary = getDictionary(locale);
   const query = await searchParams;
   const poll = await getPoll(codename);
 
   if (!poll) {
     return (
       <Notice
-        title="Poll not found"
-        message="This link does not match a poll."
+        eyebrow={dictionary.common.appName}
+        title={dictionary.notice.pollNotFoundTitle}
+        message={dictionary.notice.pollNotFoundMessage}
       />
     );
   }
@@ -64,18 +74,18 @@ export default async function PollPage({
     <main className="pollPage">
       <section className="pollHero">
         <div>
-          <p className="eyebrow">{poll.stage || "Poll"}</p>
+          <p className="eyebrow">{poll.stage || dictionary.common.poll}</p>
           <h1>{poll.question}</h1>
           {poll.description ? <p>{poll.description}</p> : null}
         </div>
         <dl>
           <div>
-            <dt>Poll</dt>
+            <dt>{dictionary.common.poll}</dt>
             <dd>{poll.name}</dd>
           </div>
           <div>
-            <dt>Closes</dt>
-            <dd>{formatDateTime(poll.expiresAt)}</dd>
+            <dt>{dictionary.common.closes}</dt>
+            <dd>{formatDateTime(poll.expiresAt, locale)}</dd>
           </div>
         </dl>
       </section>
@@ -85,13 +95,14 @@ export default async function PollPage({
         action={`/api/polls/${encodeURIComponent(poll.codename)}/vote`}
         method="post"
       >
+        <input name="locale" type="hidden" value={locale} />
         <input name="source" type="hidden" value={source} />
         <input name="utm_source" type="hidden" value={utmSource} />
         <input name="utm_medium" type="hidden" value={utmMedium} />
         <input name="utm_campaign" type="hidden" value={utmCampaign} />
 
         <label className="field">
-          <span>Your name</span>
+          <span>{dictionary.pollPage.yourName}</span>
           <input
             autoComplete="name"
             defaultValue={previousSubmission?.voterName || ""}
@@ -106,8 +117,11 @@ export default async function PollPage({
         <fieldset className="optionsField" disabled={closed}>
           <legend>
             {poll.maxSelections === 1
-              ? "Choose one answer"
-              : `Choose ${poll.minSelections}-${poll.maxSelections} answers`}
+              ? dictionary.pollPage.chooseOne
+              : formatMessage(dictionary.pollPage.chooseRange, {
+                  min: poll.minSelections,
+                  max: poll.maxSelections,
+                })}
           </legend>
           <div className="optionsGrid">
             {poll.options.map((option) => (
@@ -128,7 +142,7 @@ export default async function PollPage({
                 />
                 <span>{option.label}</span>
                 {ended && correctAnswerIds.has(option.id) ? (
-                  <strong>Correct</strong>
+                  <strong>{dictionary.common.correct}</strong>
                 ) : null}
               </label>
             ))}
@@ -137,23 +151,25 @@ export default async function PollPage({
 
         {closed ? (
           <div className="closedAnswerPanel">
-            <p className="closedNotice">This poll is closed.</p>
+            <p className="closedNotice">{dictionary.pollPage.closed}</p>
             {ended && correctAnswers.length > 0 ? (
               <div>
-                <span>The correct answer is</span>
+                <span>{dictionary.pollPage.correctAnswerIs}</span>
                 <strong>
                   {correctAnswers.map((answer) => answer.label).join(", ")}
                 </strong>
               </div>
             ) : ended ? (
               <div>
-                <span>The correct answer has not been set yet.</span>
+                <span>{dictionary.pollPage.correctAnswerNotSet}</span>
               </div>
             ) : null}
           </div>
         ) : (
           <button className="primaryButton" type="submit">
-            {previousSubmission ? "Update Vote" : "Submit Vote"}
+            {previousSubmission
+              ? dictionary.pollPage.updateVote
+              : dictionary.pollPage.submitVote}
           </button>
         )}
       </form>

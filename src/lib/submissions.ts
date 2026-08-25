@@ -56,6 +56,8 @@ export type ResultsPayload = {
   submissions?: Submission[];
 };
 
+export type SubmissionErrorCode = "nameRequired" | "invalidAnswerCount";
+
 type PocketBaseSubmissionRecord = {
   id: string;
   pollCodename: string;
@@ -184,14 +186,14 @@ export function validateSubmission(poll: Poll, input: SubmissionInput) {
   ];
 
   if (!input.voterName.trim()) {
-    return { error: "Name is required" };
+    return { errorCode: "nameRequired" as const };
   }
 
   if (
     selectedOptionIds.length < poll.minSelections ||
     selectedOptionIds.length > poll.maxSelections
   ) {
-    return { error: "Invalid number of answers" };
+    return { errorCode: "invalidAnswerCount" as const };
   }
 
   return { selectedOptionIds };
@@ -200,7 +202,7 @@ export function validateSubmission(poll: Poll, input: SubmissionInput) {
 export async function saveSubmission(poll: Poll, input: SubmissionInput) {
   const validation = validateSubmission(poll, input);
 
-  if ("error" in validation) {
+  if ("errorCode" in validation) {
     return validation;
   }
 

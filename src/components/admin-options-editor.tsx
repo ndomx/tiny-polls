@@ -5,6 +5,14 @@ import type { PollOption } from "@/lib/polls";
 
 type AdminOptionsEditorProps = {
   correctAnswerId?: string;
+  labels: {
+    addOption: string;
+    answers: string;
+    correct: string;
+    option: (number: number) => string;
+    removeOption: (number: number) => string;
+    setLater: string;
+  };
   options: (PollOption | null)[];
 };
 
@@ -38,6 +46,7 @@ function initialRows(options: (PollOption | null)[]): OptionRow[] {
 
 export function AdminOptionsEditor({
   correctAnswerId = "",
+  labels,
   options,
 }: AdminOptionsEditorProps) {
   const [rows, setRows] = useState(() => initialRows(options));
@@ -90,7 +99,7 @@ export function AdminOptionsEditor({
   return (
     <fieldset className="adminOptionsField">
       <div className="answersHeader">
-        <legend>Answers</legend>
+        <legend>{labels.answers}</legend>
         <div className="answersHeaderActions">
           <label className="deferredAnswerChoice">
             <input
@@ -100,7 +109,7 @@ export function AdminOptionsEditor({
               type="radio"
               value=""
             />
-            <span>Set Later</span>
+            <span>{labels.setLater}</span>
           </label>
           <button
             className="secondaryButton"
@@ -108,7 +117,7 @@ export function AdminOptionsEditor({
             onClick={addOption}
             type="button"
           >
-            Add Option
+            {labels.addOption}
           </button>
         </div>
       </div>
@@ -118,7 +127,7 @@ export function AdminOptionsEditor({
           <div className="adminOptionRow" key={option.key}>
             <input name={`optionId_${index}`} type="hidden" value={option.id} />
             <label className="field">
-              <span>{`Option ${index + 1}`}</span>
+              <span>{labels.option(index + 1)}</span>
               <input
                 maxLength={160}
                 name={`optionLabel_${index}`}
@@ -135,10 +144,10 @@ export function AdminOptionsEditor({
                 type="radio"
                 value={index}
               />
-              <span>Correct</span>
+              <span>{labels.correct}</span>
             </label>
             <button
-              aria-label={`Remove option ${index + 1}`}
+              aria-label={labels.removeOption(index + 1)}
               className="removeOptionButton"
               onClick={() => removeOption(index)}
               type="button"

@@ -3,10 +3,16 @@
 import { useState } from "react";
 
 type SourceLinkCopyProps = {
+  labels: {
+    copied: string;
+    copyLink: string;
+    source: string;
+    sourcePlaceholder: string;
+  };
   pollPath: string;
 };
 
-export function SourceLinkCopy({ pollPath }: SourceLinkCopyProps) {
+export function SourceLinkCopy({ labels, pollPath }: SourceLinkCopyProps) {
   const [source, setSource] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -26,16 +32,16 @@ export function SourceLinkCopy({ pollPath }: SourceLinkCopyProps) {
   return (
     <div className="sourceCopy">
       <label className="field">
-        <span>Source</span>
+        <span>{labels.source}</span>
         <input
           onChange={(event) => setSource(event.target.value)}
-          placeholder="family, friends, group..."
+          placeholder={labels.sourcePlaceholder}
           type="text"
           value={source}
         />
       </label>
       <button className="primaryButton" onClick={copyLink} type="button">
-        {copied ? "Copied" : "Copy Link"}
+        {copied ? labels.copied : labels.copyLink}
       </button>
     </div>
   );
