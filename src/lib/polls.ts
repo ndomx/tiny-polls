@@ -26,6 +26,10 @@ export type Poll = {
   options: PollOption[];
 };
 
+export type PollWithVoteCount = Poll & {
+  voteCount: number;
+};
+
 export type PollMutationErrorCode =
   | "codenameInvalid"
   | "pollNameRequired"
@@ -151,6 +155,29 @@ export async function listPolls() {
   });
 
   return response.items.map(pollFromPocketBase);
+}
+
+export async function listPollsWithVoteCounts(): Promise<PollWithVoteCount[]> {
+  const polls = await listPolls();
+  const voteCounts = await Promise.all(
+    polls.map(async (poll) => {
+      const response = await listPocketBaseRecords<
+        Pick<PocketBaseSubmissionRecord, "id">
+      >("submissions", {
+        fields: "id",
+        filter: `poll=${pocketBaseFilterValue(poll.recordId)}`,
+        page: 1,
+        perPage: 1,
+      });
+
+      return response.totalItems;
+    }),
+  );
+
+  return polls.map((poll, index) => ({
+    ...poll,
+    voteCount: voteCounts[index] || 0,
+  }));
 }
 
 function formValue(form: FormData, key: string) {

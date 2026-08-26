@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { Notice } from "@/components/notice";
@@ -5,6 +6,7 @@ import { formatMessage, getDictionary } from "@/i18n/get-dictionary";
 import { isLocale } from "@/i18n/locales";
 import { formatDateTime } from "@/lib/format";
 import { getPoll, isExpired } from "@/lib/polls";
+import { getSiteUrl } from "@/lib/site-url";
 import { getSubmissionForVoter } from "@/lib/submissions";
 import { isValidVoterId, voterCookieName } from "@/lib/voter";
 
@@ -21,6 +23,63 @@ function getParam(
 ) {
   const value = searchParams[key];
   return Array.isArray(value) ? value[0] || "" : value || "";
+}
+
+export async function generateMetadata({
+  params,
+  searchParams,
+}: PollPageProps): Promise<Metadata> {
+  const { codename, locale } = await params;
+
+  if (!isLocale(locale)) {
+    return {};
+  }
+
+  const dictionary = getDictionary(locale);
+  const poll = await getPoll(codename);
+
+  if (!poll) {
+    return {
+      title: dictionary.notice.pollNotFoundTitle,
+      description: dictionary.notice.pollNotFoundMessage,
+    };
+  }
+
+  const query = await searchParams;
+  const source = getParam(query, "source");
+  const siteUrl = getSiteUrl();
+  const pollUrl = new URL(
+    `/${locale}/polls/${encodeURIComponent(poll.codename)}`,
+    siteUrl,
+  );
+
+  if (source) {
+    pollUrl.searchParams.set("source", source);
+  }
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: poll.name,
+    description: poll.question,
+    alternates: {
+      canonical: pollUrl.toString(),
+    },
+    openGraph: {
+      title: poll.name,
+      description: poll.question,
+      url: pollUrl.toString(),
+      images: [
+        {
+          url: "/share-preview.jpg",
+          width: 1200,
+          height: 630,
+          alt: poll.name,
+        },
+      ],
+      siteName: dictionary.common.appName,
+      type: "website",
+    },
+  };
 }
 
 export default async function PollPage({
@@ -119,18 +178,17 @@ export default async function PollPage({
             {poll.maxSelections === 1
               ? dictionary.pollPage.chooseOne
               : formatMessage(dictionary.pollPage.chooseRange, {
-                  min: poll.minSelections,
-                  max: poll.maxSelections,
-                })}
+                min: poll.minSelections,
+                max: poll.maxSelections,
+              })}
           </legend>
           <div className="optionsGrid">
             {poll.options.map((option) => (
               <label
-                className={`optionTile ${
-                  ended && correctAnswerIds.has(option.id)
+                className={`optionTile ${ended && correctAnswerIds.has(option.id)
                     ? "correctAnswerTile"
                     : ""
-                }`}
+                  }`}
                 key={option.id}
               >
                 <input

@@ -226,7 +226,7 @@ function OwnerDetails({
             <h2>{labels.submissions}</h2>
           </div>
         </div>
-        <div className="submissionList">
+        <div className="submissionList ownerSubmissionList">
           {results.submissions?.length ? (
             results.submissions.map((submission) => (
               <SubmissionCard

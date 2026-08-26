@@ -73,9 +73,11 @@
     "empty": "No polls have been created yet.",
     "codename": "Codename",
     "options": "Options",
+    "votes": "Votes",
     "actionsLabel": "{name} actions",
-    "closePoll": "Close Poll",
-    "removePoll": "Remove Poll"
+    "moreActions": "Actions",
+    "closePoll": "Close",
+    "removePoll": "Remove"
   },
   "login": {
     "title": "Sign in",
