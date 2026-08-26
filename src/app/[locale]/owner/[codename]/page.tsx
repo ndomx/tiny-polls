@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { Notice } from "@/components/notice";
@@ -55,7 +56,10 @@ export default async function OwnerPage({ params }: OwnerPageProps) {
     <main className="resultsPage">
       <section className="resultsHero">
         <div>
-          <p className="eyebrow">{dictionary.common.ownerDashboard}</p>
+          <Link className="ownerBackLink" href={withLocale(locale, "/admin")}>
+            <span aria-hidden="true">&larr;</span>
+            {dictionary.common.admin}
+          </Link>
           <h1>{results.poll.name}</h1>
           <p>{dictionary.ownerPage.description}</p>
         </div>
