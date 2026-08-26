@@ -52,13 +52,14 @@
     "share": "Proporcion",
     "voteDistribution": "Distribucion de votos",
     "totalSubmissions": "{count} envios en total",
-    "sources": "Fuentes",
-    "whereVotesCameFrom": "De donde vinieron los votos",
-    "noSourceData": "Todavia no hay datos de fuente.",
     "private": "Privado",
     "submissions": "Envios",
     "noSubmissions": "Todavia no hay envios.",
-    "voter": "Votante {id}",
+    "voterName": "Votante",
+    "voterId": "ID de votante",
+    "answers": "Respuestas",
+    "submitted": "Enviado",
+    "result": "Resultado",
     "notCorrect": "No correcta"
   },
   "ownerPage": {

@@ -195,58 +195,53 @@ function OwnerDetails({
   results: ResultsPayload;
 }) {
   const labels = dictionary.resultsShell;
+  const tableCount = results.submissions?.length ?? 0;
 
   return (
-    <div className="ownerGrid">
-      <section className="ownerPanel">
-        <div className="sectionHeader compact">
-          <div>
-            <p className="eyebrow">{labels.sources}</p>
-            <h2>{labels.whereVotesCameFrom}</h2>
-          </div>
+    <section className="ownerPanel">
+      <div className="sectionHeader compact">
+        <div>
+          <p className="eyebrow">{labels.private}</p>
+          <h2>{labels.submissions}</h2>
         </div>
-        <div className="sourceList">
-          {results.sources.length === 0 ? (
-            <p className="muted">{labels.noSourceData}</p>
-          ) : (
-            results.sources.map((source) => (
-              <div className="sourceRow" key={source.source}>
-                <span>{source.source}</span>
-                <strong>{source.count}</strong>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
-
-      <section className="ownerPanel">
-        <div className="sectionHeader compact">
-          <div>
-            <p className="eyebrow">{labels.private}</p>
-            <h2>{labels.submissions}</h2>
-          </div>
-        </div>
-        <div className="submissionList ownerSubmissionList">
-          {results.submissions?.length ? (
-            results.submissions.map((submission) => (
-              <SubmissionCard
-                dictionary={dictionary}
-                key={submission.id}
-                locale={locale}
-                submission={submission}
-                results={results}
-              />
-            ))
-          ) : (
-            <p className="muted">{labels.noSubmissions}</p>
-          )}
-        </div>
-      </section>
-    </div>
+        <span className="tableCountTag" data-table-count={tableCount}>
+          {formatMessage(labels.totalSubmissions, { count: tableCount })}
+        </span>
+      </div>
+      <div className="tableScroller ownerSubmissionList">
+        {results.submissions?.length ? (
+          <table className="ownerTable submissionsTable">
+            <thead>
+              <tr>
+                <th scope="col">{labels.voterName}</th>
+                <th scope="col">{labels.voterId}</th>
+                <th scope="col">{labels.answers}</th>
+                <th scope="col">{dictionary.common.source}</th>
+                <th scope="col">{labels.submitted}</th>
+                <th scope="col">{labels.result}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {results.submissions.map((submission) => (
+                <SubmissionRow
+                  dictionary={dictionary}
+                  key={submission.id}
+                  locale={locale}
+                  submission={submission}
+                  results={results}
+                />
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="muted">{labels.noSubmissions}</p>
+        )}
+      </div>
+    </section>
   );
 }
 
-function SubmissionCard({
+function SubmissionRow({
   dictionary,
   locale,
   results,
@@ -264,26 +259,32 @@ function SubmissionCard({
         results.poll.options.find((option) => option.id === id)?.label || id,
     )
     .join(", ");
+  const submittedLabel = formatShortTime(submission.createdAt, locale);
+  const voterId = shortVoterId(submission.voterId);
 
   return (
-    <article className="submissionCard">
-      <div>
+    <tr
+      data-answers={answers}
+      data-is-correct={submission.isCorrect}
+      data-source={submission.source}
+      data-submitted-at={submission.createdAt}
+      data-voter-id={voterId}
+      data-voter-name={submission.voterName}
+    >
+      <td>
         <strong>{submission.voterName}</strong>
-        <span>
-          {formatMessage(labels.voter, {
-            id: shortVoterId(submission.voterId),
-          })}
+      </td>
+      <td>{voterId}</td>
+      <td>{answers}</td>
+      <td>{submission.source}</td>
+      <td>
+        <time dateTime={submission.createdAt}>{submittedLabel}</time>
+      </td>
+      <td>
+        <span className={submission.isCorrect ? "winnerBadge" : "plainBadge"}>
+          {submission.isCorrect ? dictionary.common.correct : labels.notCorrect}
         </span>
-      </div>
-      <div>
-        <span>{answers}</span>
-        <span>
-          {submission.source} - {formatShortTime(submission.createdAt, locale)}
-        </span>
-      </div>
-      <span className={submission.isCorrect ? "winnerBadge" : "plainBadge"}>
-        {submission.isCorrect ? dictionary.common.correct : labels.notCorrect}
-      </span>
-    </article>
+      </td>
+    </tr>
   );
 }

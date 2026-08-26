@@ -648,57 +648,107 @@ textarea {
   font-weight: 800;
 }
 
-.ownerGrid {
-  display: grid;
-  gap: 18px;
-  grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.2fr);
-}
-
-.sourceList,
-.submissionList,
+.tableScroller,
 .pollList {
   display: grid;
   gap: 10px;
   margin-top: 16px;
 }
 
+.tableScroller {
+  overflow-x: auto;
+}
+
+.tableCountTag {
+  align-self: start;
+  background: #f1ece5;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
 .ownerSubmissionList {
   max-height: min(520px, 54vh);
-  overflow-y: auto;
+  overflow: auto;
   padding-right: 6px;
   scrollbar-gutter: stable;
 }
 
-.sourceRow,
-.submissionCard,
 .pollListItem {
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 8px;
 }
 
-.sourceRow {
-  display: flex;
-  justify-content: space-between;
+.ownerTable {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-collapse: separate;
+  border-radius: 8px;
+  border-spacing: 0;
+  overflow: hidden;
+  text-align: left;
+  width: 100%;
+}
+
+.submissionsTable {
+  min-width: 720px;
+}
+
+.ownerTable th,
+.ownerTable td {
+  border-bottom: 1px solid var(--line);
   padding: 12px;
+  vertical-align: top;
 }
 
-.submissionCard {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr) auto;
-  padding: 12px;
+.ownerTable th {
+  background: #f1ece5;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  position: sticky;
+  text-transform: uppercase;
+  top: 0;
+  z-index: 1;
 }
 
-.submissionCard div {
-  display: grid;
-  gap: 3px;
-  min-width: 0;
-}
-
-.submissionCard span {
+.ownerTable td {
   color: var(--muted);
   overflow-wrap: anywhere;
+}
+
+.ownerTable td:first-child {
+  color: var(--foreground);
+}
+
+.ownerTable td:last-child,
+.ownerTable th:last-child {
+  text-align: right;
+}
+
+.ownerTable tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.ownerTable tbody tr:hover td {
+  background: #fffaf2;
+}
+
+.submissionsTable th:nth-child(1),
+.submissionsTable td:nth-child(1),
+.submissionsTable th:nth-child(3),
+.submissionsTable td:nth-child(3) {
+  min-width: 160px;
+}
+
+.submissionsTable th:nth-child(6),
+.submissionsTable td:nth-child(6) {
+  white-space: nowrap;
 }
 
 .pollListItem {
@@ -961,8 +1011,6 @@ textarea {
   .resultsHero,
   .adminHero,
   .resultRow,
-  .ownerGrid,
-  .submissionCard,
   .pollListItem,
   .pollListMain dl,
   .formGrid,

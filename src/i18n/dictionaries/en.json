@@ -52,13 +52,14 @@
     "share": "Share",
     "voteDistribution": "Vote Distribution",
     "totalSubmissions": "{count} total submissions",
-    "sources": "Sources",
-    "whereVotesCameFrom": "Where Votes Came From",
-    "noSourceData": "No source data yet.",
     "private": "Private",
     "submissions": "Submissions",
     "noSubmissions": "No submissions yet.",
-    "voter": "Voter {id}",
+    "voterName": "Voter",
+    "voterId": "Voter ID",
+    "answers": "Answers",
+    "submitted": "Submitted",
+    "result": "Result",
     "notCorrect": "Not correct"
   },
   "ownerPage": {
