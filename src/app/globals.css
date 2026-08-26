@@ -706,15 +706,18 @@ textarea {
   vertical-align: top;
 }
 
+.ownerTable thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
 .ownerTable th {
   background: #f1ece5;
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 900;
-  position: sticky;
   text-transform: uppercase;
-  top: 0;
-  z-index: 1;
 }
 
 .ownerTable td {
@@ -737,6 +740,37 @@ textarea {
 
 .ownerTable tbody tr:hover td {
   background: #fffaf2;
+}
+
+.tableFilterRow th {
+  background: #fffdf9;
+  padding: 8px 12px;
+  text-transform: none;
+}
+
+.tableFilterSelect {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--foreground);
+  font-size: 0.82rem;
+  font-weight: 700;
+  min-height: 36px;
+  padding: 0 10px;
+  width: 100%;
+}
+
+.tableFilterSelect:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(23, 107, 91, 0.18);
+  outline: none;
+}
+
+.ownerTable .emptyTableCell {
+  color: var(--muted);
+  height: 84px;
+  text-align: center;
+  vertical-align: middle;
 }
 
 .submissionsTable th:nth-child(1),
