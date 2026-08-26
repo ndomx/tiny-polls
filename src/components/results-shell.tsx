@@ -1,7 +1,11 @@
+import {
+  type OwnerSubmissionRow,
+  OwnerSubmissionsTable,
+} from "@/components/owner-submissions-table";
 import { type Dictionary, formatMessage } from "@/i18n/get-dictionary";
 import type { Locale } from "@/i18n/locales";
 import { formatClock, formatShortTime } from "@/lib/format";
-import type { ResultsPayload, Submission } from "@/lib/submissions";
+import type { ResultsPayload } from "@/lib/submissions";
 import { shortVoterId } from "@/lib/voter";
 
 const colors = ["#176b5b", "#d96c3d", "#3656a6", "#a33f63", "#6d7f2f"];
@@ -195,95 +199,59 @@ function OwnerDetails({
   results: ResultsPayload;
 }) {
   const labels = dictionary.resultsShell;
-
-  return (
-    <div className="ownerGrid">
-      <section className="ownerPanel">
-        <div className="sectionHeader compact">
-          <div>
-            <p className="eyebrow">{labels.sources}</p>
-            <h2>{labels.whereVotesCameFrom}</h2>
-          </div>
-        </div>
-        <div className="sourceList">
-          {results.sources.length === 0 ? (
-            <p className="muted">{labels.noSourceData}</p>
-          ) : (
-            results.sources.map((source) => (
-              <div className="sourceRow" key={source.source}>
-                <span>{source.source}</span>
-                <strong>{source.count}</strong>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
-
-      <section className="ownerPanel">
-        <div className="sectionHeader compact">
-          <div>
-            <p className="eyebrow">{labels.private}</p>
-            <h2>{labels.submissions}</h2>
-          </div>
-        </div>
-        <div className="submissionList ownerSubmissionList">
-          {results.submissions?.length ? (
-            results.submissions.map((submission) => (
-              <SubmissionCard
-                dictionary={dictionary}
-                key={submission.id}
-                locale={locale}
-                submission={submission}
-                results={results}
-              />
-            ))
-          ) : (
-            <p className="muted">{labels.noSubmissions}</p>
-          )}
-        </div>
-      </section>
-    </div>
+  const optionLabels = new Map(
+    results.poll.options.map((option) => [option.id, option.label]),
   );
-}
+  const rows: OwnerSubmissionRow[] = (results.submissions ?? []).map(
+    (submission) => {
+      const answerLabels = submission.selectedOptions.map(
+        (id) => optionLabels.get(id) || id,
+      );
 
-function SubmissionCard({
-  dictionary,
-  locale,
-  results,
-  submission,
-}: {
-  dictionary: Dictionary;
-  locale: Locale;
-  results: ResultsPayload;
-  submission: Submission;
-}) {
-  const labels = dictionary.resultsShell;
-  const answers = submission.selectedOptions
-    .map(
-      (id) =>
-        results.poll.options.find((option) => option.id === id)?.label || id,
-    )
-    .join(", ");
+      return {
+        id: submission.id,
+        voterName: submission.voterName,
+        voterId: shortVoterId(submission.voterId),
+        answerText: answerLabels.join(", "),
+        selectedOptionIds: submission.selectedOptions,
+        source: submission.source,
+        submittedAt: submission.createdAt,
+        submittedLabel: formatShortTime(submission.createdAt, locale),
+        isCorrect: submission.isCorrect,
+        resultLabel: submission.isCorrect
+          ? dictionary.common.correct
+          : labels.notCorrect,
+      };
+    },
+  );
 
   return (
-    <article className="submissionCard">
-      <div>
-        <strong>{submission.voterName}</strong>
-        <span>
-          {formatMessage(labels.voter, {
-            id: shortVoterId(submission.voterId),
-          })}
-        </span>
-      </div>
-      <div>
-        <span>{answers}</span>
-        <span>
-          {submission.source} - {formatShortTime(submission.createdAt, locale)}
-        </span>
-      </div>
-      <span className={submission.isCorrect ? "winnerBadge" : "plainBadge"}>
-        {submission.isCorrect ? dictionary.common.correct : labels.notCorrect}
-      </span>
-    </article>
+    <section className="ownerPanel">
+      <OwnerSubmissionsTable
+        labels={{
+          allOptions: labels.allOptions,
+          allSources: labels.allSources,
+          answers: labels.answers,
+          filteredSubmissions: labels.filteredSubmissions,
+          noFilteredSubmissions: labels.noFilteredSubmissions,
+          noSubmissions: labels.noSubmissions,
+          optionFilter: labels.optionFilter,
+          private: labels.private,
+          result: labels.result,
+          source: dictionary.common.source,
+          sourceFilter: labels.sourceFilter,
+          submissions: labels.submissions,
+          submitted: labels.submitted,
+          totalSubmissions: labels.totalSubmissions,
+          voterId: labels.voterId,
+          voterName: labels.voterName,
+        }}
+        options={results.poll.options.map((option) => ({
+          id: option.id,
+          label: option.label,
+        }))}
+        rows={rows}
+      />
+    </section>
   );
 }

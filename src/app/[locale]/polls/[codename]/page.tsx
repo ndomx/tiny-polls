@@ -178,17 +178,18 @@ export default async function PollPage({
             {poll.maxSelections === 1
               ? dictionary.pollPage.chooseOne
               : formatMessage(dictionary.pollPage.chooseRange, {
-                min: poll.minSelections,
-                max: poll.maxSelections,
-              })}
+                  min: poll.minSelections,
+                  max: poll.maxSelections,
+                })}
           </legend>
           <div className="optionsGrid">
             {poll.options.map((option) => (
               <label
-                className={`optionTile ${ended && correctAnswerIds.has(option.id)
+                className={`optionTile ${
+                  ended && correctAnswerIds.has(option.id)
                     ? "correctAnswerTile"
                     : ""
-                  }`}
+                }`}
                 key={option.id}
               >
                 <input
