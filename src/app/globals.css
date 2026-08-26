@@ -678,6 +678,10 @@ textarea {
   scrollbar-gutter: stable;
 }
 
+.ownerSubmissionList[data-filter-open="true"] {
+  padding-bottom: 180px;
+}
+
 .pollListItem {
   background: #fff;
   border: 1px solid var(--line);
@@ -690,7 +694,7 @@ textarea {
   border-collapse: separate;
   border-radius: 8px;
   border-spacing: 0;
-  overflow: hidden;
+  overflow: visible;
   text-align: left;
   width: 100%;
 }
@@ -742,27 +746,80 @@ textarea {
   background: #fffaf2;
 }
 
-.tableFilterRow th {
-  background: #fffdf9;
-  padding: 8px 12px;
-  text-transform: none;
+.tableHeaderAction {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  min-width: 0;
+  position: relative;
 }
 
-.tableFilterSelect {
+.tableFilterButton {
+  align-items: center;
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 6px;
-  color: var(--foreground);
-  font-size: 0.82rem;
-  font-weight: 700;
-  min-height: 36px;
-  padding: 0 10px;
-  width: 100%;
+  color: var(--muted);
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 28px;
+  justify-content: center;
+  padding: 0;
+  width: 28px;
 }
 
-.tableFilterSelect:focus-visible {
+.tableFilterButton:hover,
+.tableFilterButton[data-active="true"] {
+  background: #e4f5ef;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.tableFilterButton:focus-visible {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px rgba(23, 107, 91, 0.18);
+  outline: none;
+}
+
+.tableFilterIcon {
+  fill: currentColor;
+  height: 14px;
+  width: 14px;
+}
+
+.tableFilterPopover {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 14px 32px rgba(23, 33, 29, 0.16);
+  display: grid;
+  max-height: 220px;
+  min-width: 190px;
+  overflow-y: auto;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 5;
+}
+
+.tableFilterMenuItem {
+  background: transparent;
+  border: 0;
+  color: var(--foreground);
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-weight: 700;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.tableFilterMenuItem:hover,
+.tableFilterMenuItem:focus-visible,
+.tableFilterMenuItem[data-selected="true"] {
+  background: #e4f5ef;
+  color: #0f4c41;
   outline: none;
 }
 
@@ -771,6 +828,18 @@ textarea {
   height: 84px;
   text-align: center;
   vertical-align: middle;
+}
+
+.srOnly {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
 }
 
 .submissionsTable th:nth-child(1),

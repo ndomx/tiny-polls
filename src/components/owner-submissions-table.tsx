@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export type OwnerSubmissionRow = {
   id: string;
@@ -45,6 +45,8 @@ type OwnerSubmissionsTableProps = {
   rows: OwnerSubmissionRow[];
 };
 
+type FilterKey = "answers" | "source";
+
 function formatCountLabel(
   message: string,
   values: Record<string, string | number>,
@@ -63,6 +65,30 @@ export function OwnerSubmissionsTable({
 }: OwnerSubmissionsTableProps) {
   const [selectedOptionId, setSelectedOptionId] = useState("");
   const [selectedSource, setSelectedSource] = useState("");
+  const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
+  const tableRootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handlePointerDown(event: PointerEvent) {
+      if (!tableRootRef.current?.contains(event.target as Node)) {
+        setOpenFilter(null);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setOpenFilter(null);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   const sources = useMemo(
     () =>
@@ -90,9 +116,13 @@ export function OwnerSubmissionsTable({
           count: filteredRows.length,
           total: rows.length,
         });
+  const selectedOptionLabel =
+    options.find((option) => option.id === selectedOptionId)?.label ||
+    labels.allOptions;
+  const selectedSourceLabel = selectedSource || labels.allSources;
 
   return (
-    <>
+    <div ref={tableRootRef}>
       <div className="sectionHeader compact">
         <div>
           <p className="eyebrow">{labels.private}</p>
@@ -102,57 +132,106 @@ export function OwnerSubmissionsTable({
           {countLabel}
         </span>
       </div>
-      <div className="tableScroller ownerSubmissionList">
+      <div
+        className="tableScroller ownerSubmissionList"
+        data-filter-open={Boolean(openFilter)}
+      >
         {rows.length ? (
           <table className="ownerTable submissionsTable">
             <thead>
               <tr>
                 <th scope="col">{labels.voterName}</th>
                 <th scope="col">{labels.voterId}</th>
-                <th scope="col">{labels.answers}</th>
-                <th scope="col">{labels.source}</th>
+                <th scope="col">
+                  <span className="tableHeaderAction">
+                    <span>{labels.answers}</span>
+                    <button
+                      aria-expanded={openFilter === "answers"}
+                      aria-haspopup="menu"
+                      className="tableFilterButton"
+                      data-active={Boolean(selectedOptionId)}
+                      onClick={() =>
+                        setOpenFilter((current) =>
+                          current === "answers" ? null : "answers",
+                        )
+                      }
+                      title={selectedOptionLabel}
+                      type="button"
+                    >
+                      <span className="srOnly">{labels.optionFilter}</span>
+                      <FilterIcon />
+                    </button>
+                    {openFilter === "answers" ? (
+                      <div className="tableFilterPopover" role="menu">
+                        <FilterMenuItem
+                          isSelected={!selectedOptionId}
+                          label={labels.allOptions}
+                          onSelect={() => {
+                            setSelectedOptionId("");
+                            setOpenFilter(null);
+                          }}
+                        />
+                        {options.map((option) => (
+                          <FilterMenuItem
+                            isSelected={selectedOptionId === option.id}
+                            key={option.id}
+                            label={option.label}
+                            onSelect={() => {
+                              setSelectedOptionId(option.id);
+                              setOpenFilter(null);
+                            }}
+                          />
+                        ))}
+                      </div>
+                    ) : null}
+                  </span>
+                </th>
+                <th scope="col">
+                  <span className="tableHeaderAction">
+                    <span>{labels.source}</span>
+                    <button
+                      aria-expanded={openFilter === "source"}
+                      aria-haspopup="menu"
+                      className="tableFilterButton"
+                      data-active={Boolean(selectedSource)}
+                      onClick={() =>
+                        setOpenFilter((current) =>
+                          current === "source" ? null : "source",
+                        )
+                      }
+                      title={selectedSourceLabel}
+                      type="button"
+                    >
+                      <span className="srOnly">{labels.sourceFilter}</span>
+                      <FilterIcon />
+                    </button>
+                    {openFilter === "source" ? (
+                      <div className="tableFilterPopover" role="menu">
+                        <FilterMenuItem
+                          isSelected={!selectedSource}
+                          label={labels.allSources}
+                          onSelect={() => {
+                            setSelectedSource("");
+                            setOpenFilter(null);
+                          }}
+                        />
+                        {sources.map((source) => (
+                          <FilterMenuItem
+                            isSelected={selectedSource === source}
+                            key={source}
+                            label={source}
+                            onSelect={() => {
+                              setSelectedSource(source);
+                              setOpenFilter(null);
+                            }}
+                          />
+                        ))}
+                      </div>
+                    ) : null}
+                  </span>
+                </th>
                 <th scope="col">{labels.submitted}</th>
                 <th scope="col">{labels.result}</th>
-              </tr>
-              <tr className="tableFilterRow">
-                <th />
-                <th />
-                <th>
-                  <select
-                    aria-label={labels.optionFilter}
-                    className="tableFilterSelect"
-                    onChange={(event) =>
-                      setSelectedOptionId(event.currentTarget.value)
-                    }
-                    value={selectedOptionId}
-                  >
-                    <option value="">{labels.allOptions}</option>
-                    {options.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </th>
-                <th>
-                  <select
-                    aria-label={labels.sourceFilter}
-                    className="tableFilterSelect"
-                    onChange={(event) =>
-                      setSelectedSource(event.currentTarget.value)
-                    }
-                    value={selectedSource}
-                  >
-                    <option value="">{labels.allSources}</option>
-                    {sources.map((source) => (
-                      <option key={source} value={source}>
-                        {source}
-                      </option>
-                    ))}
-                  </select>
-                </th>
-                <th />
-                <th />
               </tr>
             </thead>
             <tbody>
@@ -200,6 +279,37 @@ export function OwnerSubmissionsTable({
           <p className="muted">{labels.noSubmissions}</p>
         )}
       </div>
-    </>
+    </div>
+  );
+}
+
+function FilterMenuItem({
+  isSelected,
+  label,
+  onSelect,
+}: {
+  isSelected: boolean;
+  label: string;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      aria-checked={isSelected}
+      className="tableFilterMenuItem"
+      data-selected={isSelected}
+      onClick={onSelect}
+      role="menuitemradio"
+      type="button"
+    >
+      {label}
+    </button>
+  );
+}
+
+function FilterIcon() {
+  return (
+    <svg aria-hidden="true" className="tableFilterIcon" viewBox="0 0 20 20">
+      <path d="M4 5h12l-5 6v4l-2 1v-5L4 5Z" />
+    </svg>
   );
 }
