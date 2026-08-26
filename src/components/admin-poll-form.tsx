@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AdminOptionsEditor } from "@/components/admin-options-editor";
-import { type Dictionary, formatMessage } from "@/i18n/get-dictionary";
+import type { Dictionary } from "@/i18n/get-dictionary";
 import { type Locale, withLocale } from "@/i18n/locales";
 import type { Poll, PollOption } from "@/lib/polls";
 
@@ -145,9 +145,8 @@ export function AdminPollForm({
           addOption: optionsEditor.addOption,
           answers: optionsEditor.answers,
           correct: optionsEditor.correct,
-          option: (number) => formatMessage(optionsEditor.option, { number }),
-          removeOption: (number) =>
-            formatMessage(optionsEditor.removeOption, { number }),
+          option: optionsEditor.option,
+          removeOption: optionsEditor.removeOption,
           setLater: optionsEditor.setLater,
         }}
         options={optionRows(poll)}

@@ -9,8 +9,8 @@ type AdminOptionsEditorProps = {
     addOption: string;
     answers: string;
     correct: string;
-    option: (number: number) => string;
-    removeOption: (number: number) => string;
+    option: string;
+    removeOption: string;
     setLater: string;
   };
   options: (PollOption | null)[];
@@ -42,6 +42,10 @@ function initialRows(options: (PollOption | null)[]): OptionRow[] {
     key: option?.id || `new-${index}`,
     label: option?.label || "",
   }));
+}
+
+function formatLabel(message: string, number: number) {
+  return message.replaceAll("{number}", String(number));
 }
 
 export function AdminOptionsEditor({
@@ -127,7 +131,7 @@ export function AdminOptionsEditor({
           <div className="adminOptionRow" key={option.key}>
             <input name={`optionId_${index}`} type="hidden" value={option.id} />
             <label className="field">
-              <span>{labels.option(index + 1)}</span>
+              <span>{formatLabel(labels.option, index + 1)}</span>
               <input
                 maxLength={160}
                 name={`optionLabel_${index}`}
@@ -147,7 +151,7 @@ export function AdminOptionsEditor({
               <span>{labels.correct}</span>
             </label>
             <button
-              aria-label={labels.removeOption(index + 1)}
+              aria-label={formatLabel(labels.removeOption, index + 1)}
               className="removeOptionButton"
               onClick={() => removeOption(index)}
               type="button"
