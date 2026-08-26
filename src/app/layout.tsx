@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     description: dictionary.metadata.description,
     images: [
       {
-        url: "/share-preview.jpg",
+        url: "/share-preview.jpeg",
         width: 1200,
         height: 630,
         alt: dictionary.metadata.title,
