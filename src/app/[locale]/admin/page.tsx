@@ -4,7 +4,7 @@ import { formatMessage, getDictionary } from "@/i18n/get-dictionary";
 import { isLocale, type Locale, withLocale } from "@/i18n/locales";
 import { getAdminSession } from "@/lib/admin-auth";
 import { formatDateTime } from "@/lib/format";
-import { listPolls, type Poll } from "@/lib/polls";
+import { listPollsWithVoteCounts, type Poll } from "@/lib/polls";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +14,10 @@ type AdminPageProps = {
 
 function pollHref(locale: Locale, poll: Poll) {
   return withLocale(locale, `/polls/${encodeURIComponent(poll.codename)}`);
+}
+
+function ownerHref(locale: Locale, poll: Poll) {
+  return withLocale(locale, `/owner/${encodeURIComponent(poll.codename)}`);
 }
 
 function adminPollAction(poll: Poll, action: "close" | "remove") {
@@ -39,7 +43,7 @@ export default async function AdminPage({ params }: AdminPageProps) {
     );
   }
 
-  const polls = await listPolls();
+  const polls = await listPollsWithVoteCounts();
   const statusLabels = {
     closed: dictionary.pollForm.statusClosed,
     draft: dictionary.pollForm.statusDraft,
@@ -88,10 +92,20 @@ export default async function AdminPage({ params }: AdminPageProps) {
           <div className="pollList">
             {polls.map((poll) => (
               <article className="pollListItem" key={poll.recordId}>
+                <Link
+                  aria-label={`${dictionary.common.results}: ${poll.name}`}
+                  className="pollCardLink"
+                  href={ownerHref(locale, poll)}
+                />
                 <div className="pollListMain">
-                  <span className={`statusBadge ${poll.status}`}>
-                    {statusLabels[poll.status]}
-                  </span>
+                  <div className="pollListMeta">
+                    <span className={`statusBadge ${poll.status}`}>
+                      {statusLabels[poll.status]}
+                    </span>
+                    <span className="voteBadge">
+                      {poll.voteCount} {dictionary.adminPage.votes}
+                    </span>
+                  </div>
                   <h3>{poll.name}</h3>
                   <p>{poll.question}</p>
                   <dl>
@@ -103,10 +117,6 @@ export default async function AdminPage({ params }: AdminPageProps) {
                       <dt>{dictionary.common.closes}</dt>
                       <dd>{formatDateTime(poll.expiresAt, locale)}</dd>
                     </div>
-                    <div>
-                      <dt>{dictionary.adminPage.options}</dt>
-                      <dd>{poll.options.length}</dd>
-                    </div>
                   </dl>
                 </div>
                 <nav
@@ -115,37 +125,52 @@ export default async function AdminPage({ params }: AdminPageProps) {
                     name: poll.name,
                   })}
                 >
+                  <details className="pollMenu">
+                    <summary aria-label={dictionary.adminPage.moreActions}>
+                      <span aria-hidden="true" className="pollMenuIcon">
+                        <span />
+                        <span />
+                        <span />
+                      </span>
+                    </summary>
+                    <div className="pollMenuItems">
+                      <Link
+                        href={withLocale(
+                          locale,
+                          `/admin/polls/${encodeURIComponent(poll.codename)}/edit`,
+                        )}
+                      >
+                        {dictionary.common.edit}
+                      </Link>
+                      <form
+                        action={adminPollAction(poll, "close")}
+                        method="post"
+                      >
+                        <input name="locale" type="hidden" value={locale} />
+                        <button
+                          disabled={poll.status === "closed"}
+                          type="submit"
+                        >
+                          {dictionary.adminPage.closePoll}
+                        </button>
+                      </form>
+                      <form
+                        action={adminPollAction(poll, "remove")}
+                        method="post"
+                      >
+                        <input name="locale" type="hidden" value={locale} />
+                        <button className="dangerAction" type="submit">
+                          {dictionary.adminPage.removePoll}
+                        </button>
+                      </form>
+                    </div>
+                  </details>
                   <Link
-                    href={withLocale(
-                      locale,
-                      `/owner/${encodeURIComponent(poll.codename)}`,
-                    )}
+                    className="pollVoteAction"
+                    href={pollHref(locale, poll)}
                   >
-                    {dictionary.common.results}
-                  </Link>
-                  <Link href={pollHref(locale, poll)}>
                     {dictionary.common.vote}
                   </Link>
-                  <Link
-                    href={withLocale(
-                      locale,
-                      `/admin/polls/${encodeURIComponent(poll.codename)}/edit`,
-                    )}
-                  >
-                    {dictionary.common.edit}
-                  </Link>
-                  <form action={adminPollAction(poll, "close")} method="post">
-                    <input name="locale" type="hidden" value={locale} />
-                    <button disabled={poll.status === "closed"} type="submit">
-                      {dictionary.adminPage.closePoll}
-                    </button>
-                  </form>
-                  <form action={adminPollAction(poll, "remove")} method="post">
-                    <input name="locale" type="hidden" value={locale} />
-                    <button className="dangerAction" type="submit">
-                      {dictionary.adminPage.removePoll}
-                    </button>
-                  </form>
                 </nav>
               </article>
             ))}

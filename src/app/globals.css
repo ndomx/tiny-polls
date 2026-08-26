@@ -681,14 +681,50 @@ textarea {
 }
 
 .pollListItem {
+  align-items: start;
   display: grid;
-  gap: 18px;
-  grid-template-columns: minmax(0, 1fr) auto;
-  padding: 18px;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) 150px;
+  min-height: 170px;
+  padding: 16px;
+  position: relative;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.pollListItem:has(.pollCardLink:hover) {
+  border-color: #bfb5a8;
+  box-shadow: 0 10px 28px rgba(23, 33, 29, 0.1);
+  transform: translateY(-1px);
+}
+
+.pollListItem:has(.pollCardLink:focus-visible) {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.pollListItem:has(.pollMenu[open]) {
+  z-index: 3;
+}
+
+.pollCardLink {
+  border-radius: inherit;
+  inset: 0;
+  position: absolute;
+  z-index: 1;
 }
 
 .pollListMain {
   min-width: 0;
+}
+
+.pollListMeta {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .pollListMain h3 {
@@ -704,7 +740,7 @@ textarea {
 .pollListMain dl {
   display: grid;
   gap: 10px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin: 16px 0 0;
 }
 
@@ -722,16 +758,80 @@ textarea {
 }
 
 .pollActions {
-  align-content: start;
-  display: grid;
-  gap: 8px;
-  min-width: 120px;
+  align-items: end;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
 }
 
-.pollActions a,
-.pollActions button {
-  background: transparent;
+.pollMenu {
+  position: relative;
+}
+
+.pollMenu summary {
+  align-items: center;
+  background: #fff;
   border: 1px solid var(--line);
+  border-radius: 6px;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 800;
+  justify-content: center;
+  height: 38px;
+  padding: 0;
+  text-align: center;
+  text-decoration: none;
+  width: 38px;
+}
+
+.pollMenu summary::-webkit-details-marker {
+  display: none;
+}
+
+.pollMenuIcon {
+  align-items: center;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 3px;
+  justify-content: center;
+}
+
+.pollMenuIcon span {
+  background: currentColor;
+  border-radius: 999px;
+  display: block;
+  height: 3px;
+  width: 3px;
+}
+
+.pollMenu[open] summary {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.pollMenuItems {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(23, 33, 29, 0.14);
+  display: grid;
+  min-width: 168px;
+  padding: 6px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 3;
+}
+
+.pollMenuItems a,
+.pollMenuItems button {
+  background: transparent;
+  border: 0;
   border-radius: 6px;
   color: inherit;
   cursor: pointer;
@@ -743,19 +843,48 @@ textarea {
   width: 100%;
 }
 
-.pollActions button:disabled {
+.pollMenuItems a:hover,
+.pollMenuItems button:hover {
+  background: #f7f4ef;
+}
+
+.pollMenuItems button:disabled {
   color: var(--muted);
   cursor: not-allowed;
   opacity: 0.62;
 }
 
-.pollActions .dangerAction {
-  border-color: #d9b6a7;
+.pollMenuItems .dangerAction {
   color: #873b22;
+}
+
+.pollMenuItems .dangerAction:hover {
+  background: #f7e3d8;
+}
+
+.pollVoteAction {
+  align-items: center;
+  background: var(--accent);
+  border: 0;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 800;
+  justify-content: center;
+  min-height: 42px;
+  min-width: 96px;
+  padding: 0 18px;
+  text-decoration: none;
+}
+
+.pollVoteAction:hover {
+  background: #0f4c41;
 }
 
 .winnerBadge,
 .plainBadge,
+.voteBadge,
 .statusBadge {
   align-self: center;
   border-radius: 999px;
@@ -772,6 +901,11 @@ textarea {
 .plainBadge {
   background: #f1ece5;
   color: var(--muted);
+}
+
+.voteBadge {
+  background: #f1ece5;
+  color: var(--foreground);
 }
 
 .statusBadge {
@@ -833,5 +967,13 @@ textarea {
 
   .percentage {
     text-align: left;
+  }
+
+  .pollListMain dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pollActions {
+    width: 100%;
   }
 }

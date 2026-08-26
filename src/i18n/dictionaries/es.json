@@ -73,9 +73,11 @@
     "empty": "Todavia no se han creado encuestas.",
     "codename": "Codigo",
     "options": "Opciones",
+    "votes": "Votos",
     "actionsLabel": "Acciones para {name}",
-    "closePoll": "Cerrar encuesta",
-    "removePoll": "Eliminar encuesta"
+    "moreActions": "Acciones",
+    "closePoll": "Cerrar",
+    "removePoll": "Eliminar"
   },
   "login": {
     "title": "Iniciar sesion",
